@@ -823,3 +823,9 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 **Input Map.** The project names actions independently of their buttons so scripts and prompts can use the same binding. The Journal action comes from the Input Map and the HUD reads its key or controller button.
 
 **Sampling an animation.** An animation can set a property to a point on another clip's timeline. The waking scene samples the imported lying and sitting clips on its cutscene stand-ins so it can cut from the bunk to Lantern and back.
+
+**A multiplier on a light (#249).** `Flicker` has a `level` from 0 to 1 that scales its brightness without stopping its waver, so a ship's lights can be faded up and down by one number. `Lantern.set_glow()` does the same for a lantern's flame, glass and light. `ShipLights` walks the ship's node tree once to find every light and sets them all through these.
+
+**Inner classes and global names.** A script can declare a small class inside itself (`class Entry:`) for a bundle of fields. Its name can't match a global `class_name`: an inner `Lamp` or an enum `Stage` would shadow the game's own `Lamp` and `Stage`, so `ShipAwakening` calls its enum `Step`.
+
+**Dialogue flags as a switch.** A cutscene script can `set stove_lit`, and a node listening to `Game.dialogue.flag_changed` acts on that exact moment (the lantern's flame passing to the stove), so the cutscene times the effect without a new cue.

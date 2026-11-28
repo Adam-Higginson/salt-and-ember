@@ -67,6 +67,17 @@ const LOW_LEAN: float = 0.45
 ## How long his glass stays fogged after he comes in from the rain, in seconds.
 @export var fog_seconds: float = 4.0
 
+## Below this warmth he floats weaker (see [method weakness]): lower, lagging
+## further behind, bobbing more and with a guttering light.
+@export var weak_below: float = 0.6
+## How much lower than usual he floats at his weakest, in metres.
+@export var weak_drop: float = 0.4
+## How much further behind you he floats at his weakest, in metres.
+@export var weak_lag: float = 0.3
+## How much slower to catch up he is at his weakest, as a share of his
+## usual stiffness.
+@export_range(0.1, 1.0) var weak_stiffness: float = 0.4
+
 ## How much warmth he loses a minute, 0 to 1. A warm meal shared with him
 ## brings it back (see [SupperSpot]).
 @export var warmth_per_minute: float = 0.025
@@ -94,6 +105,11 @@ var warmth: float = 1.0:
 		warmth = clampf(value, min_warmth, 1.0)
 		if warmth > 0.45:
 			_said_dim = false
+
+## The warmth he's held at while he's low (#249), or below zero for his
+## usual weakest, [member min_warmth]. The ship's dark start holds him a
+## little above it, so giving the stove his flame can take him lower.
+var low_warmth: float = -1.0
 
 ## What his light is saying about a fight (see [method set_mood]).
 var mood: Mood:
@@ -189,7 +205,8 @@ func _physics_process(delta: float) -> void:
 	if _spot.distance_to(goal) > leash:
 		snap_to_player()
 		return
-	var pull: Vector3 = (goal - _spot) * stiffness - _velocity * damping
+	var pull: Vector3 = (goal - _spot) * lerpf(stiffness, stiffness * weak_stiffness,
+			weakness()) - _velocity * damping
 	_velocity += pull * delta
 	_spot += _velocity * delta
 	_excited = maxf(_excited - delta, 0.0)
@@ -233,6 +250,27 @@ func let_go() -> void:
 	var carrier: Node3D = _carrier()
 	if carrier != null:
 		_home_was = carrier.global_position
+
+
+## Gives some of his own flame away (#249: lighting the galley stove): he
+## goes dimmer by [param amount], and if he's low, to his weakest.
+func give_flame(amount: float) -> void:
+	low_warmth = -1.0
+	warmth -= amount
+	_apply_warmth()
+
+
+## Says [param words] in a speech bubble beside him, quietly: a murmur he
+## can manage even when he's low and silent to everything else (#249).
+func murmur(words: String) -> void:
+	_voice.say(words)
+
+
+## How weak he looks, 0 (his usual self) to 1 (as weak as he gets), from how
+## warm he is: below [member weak_below] he floats lower and lags, bobs more
+## and his light gutters.
+func weakness() -> float:
+	return clampf(remap(warmth, min_warmth, weak_below, 1.0, 0.0), 0.0, 1.0)
 
 
 ## Warms him back up by [param amount] (0 to 1): a meal shared with him.
@@ -436,7 +474,9 @@ func goal_spot() -> Vector3:
 		return _hover_over(_watched)
 	if is_instance_valid(_attention):
 		return _hover_over(_attention)
-	return follow_spot(player.global_position, player.facing, follow_offset)
+	var weak: float = weakness()
+	var offset: Vector3 = follow_offset + Vector3(0.0, -weak_drop, weak_lag) * weak
+	return follow_spot(player.global_position, player.facing, offset)
 
 
 ## The spot by the shoulder of a player at [param player_position] facing
@@ -459,7 +499,7 @@ func _hover_over(what: Node3D) -> Vector3:
 
 ## How far up or down his bob has taken him at [param time] seconds.
 func bob_offset(time: float) -> float:
-	return sin(time * TAU * bob_rate) * bob_height
+	return sin(time * TAU * bob_rate) * bob_height * (1.0 + weakness())
 
 
 # Decides whether to go and look at what the player's facing: only once
@@ -479,7 +519,7 @@ func _notice(delta: float) -> void:
 # sea, he's as dim as he goes and says nothing about it.
 func _cool(delta: float) -> void:
 	if is_low():
-		warmth = min_warmth
+		warmth = low_warmth if low_warmth >= 0.0 else min_warmth
 		_apply_warmth()
 		return
 	warmth -= warmth_per_minute * delta / 60.0
@@ -495,8 +535,9 @@ func _apply_warmth() -> void:
 		return
 	_light.omni_range = lerpf(2.4, 4.5, warmth)
 	var bright: float = 1.35 if _attention != null else 1.1
-	_light.amount = _calm_amount
-	_light.speed = _calm_speed
+	# Weak, his light gutters: more waver, and quicker.
+	_light.amount = lerpf(_calm_amount, 0.5, weakness())
+	_light.speed = lerpf(_calm_speed, 9.0, weakness())
 	match _mood:
 		Mood.WARNING:
 			_light.amount = 0.9

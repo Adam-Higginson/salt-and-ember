@@ -14,6 +14,7 @@ const GROUP: StringName = &"lanterns"
 @export var lit: bool = true:
 	set(value):
 		lit = value
+		_level = 1.0 if value else 0.0
 		if is_node_ready():
 			_show_flame()
 ## How bright the lantern's light is.
@@ -26,6 +27,9 @@ const GROUP: StringName = &"lanterns"
 ## How much the flame makes the light waver, as a fraction of its brightness:
 ## a little, so the light breathes without flashing.
 @export_range(0.0, 0.5) var flicker: float = 0.08
+
+## How much of its glow is on while it's lit, 0 to 1 (see [method set_glow]).
+var _level: float = 1.0
 
 @onready var _light: Flicker = $Light
 @onready var _glass: GeometryInstance3D = $Glass
@@ -50,6 +54,15 @@ func set_lit(burning: bool) -> void:
 	lit = burning
 
 
+## Brings the lantern up or down to [param level], 0 (out) to 1 (burning
+## fully): a ship's lights coming on one after another fade up through this.
+func set_glow(level: float) -> void:
+	lit = level > 0.0
+	_level = clampf(level, 0.0, 1.0) if lit else 0.0
+	if is_node_ready():
+		_show_flame()
+
+
 ## How much the flame behind the glass is burning: 1 lit, 0 out (the glass
 ## still shows, with an empty lantern and a dark wick behind it).
 func flame_burning() -> float:
@@ -59,4 +72,5 @@ func flame_burning() -> float:
 
 func _show_flame() -> void:
 	_light.visible = lit
-	_glass.set_instance_shader_parameter(&"burning", 1.0 if lit else 0.0)
+	_light.level = _level
+	_glass.set_instance_shader_parameter(&"burning", _level)

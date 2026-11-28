@@ -809,6 +809,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0, 2.0, 5.75)
 [node name="LanternArrives" type="Marker3D" parent="Marks" groups=["marks"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 2.3, 5.95)
 
+[node name="CaptainAsleep" type="Marker3D" parent="Marks" groups=["marks"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9, 5.3, 9.7)
+
+[node name="StoveFlame" type="Marker3D" parent="Marks" groups=["marks"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 1.8, 2.75)
+
 [node name="TheHelm" type="Marker3D" parent="Shots" groups=["shots"]]
 transform = Transform3D(-0.5787, -0.2547, 0.7747, 0.0, 0.95, 0.3124, -0.8155, 0.1808, -0.5498, 2.7, 9.5, 10.5)
 

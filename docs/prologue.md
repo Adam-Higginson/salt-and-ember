@@ -113,6 +113,8 @@ A rope ladder is already trailing in the water. You climb up together, carrying 
 
 **The ship comes alive (decided, planned).** The lantern lights the galley stove with his own flame, giving some of his light to start it, and goes dim. This pays off Scene U2, where he gave the buoy a little of his flame. The first quest (spicy tomato soup to restore his light) then carries over almost as built, and that first meal also brings the captain round. *(Lines to be written, #231.)*
 
+*Built as a greybox (#249): `scenes/prototype/sea.tscn`, the `Awakening` node, Start Here; the stove scene is `data/dialogue/awakening.dlg` and the captain's words are the `asleep` section of `heron.dlg`. Lines are first drafts. The captain is slumped by his cabin door (the cabin is still a facade) and hands over the pot in his one weak exchange.*
+
 ### The title (#232)
 
 A new voyage opens on home waters at dusk (Scene U1) instead of her nameboard; the ship's name is the title drop when she finds you. A saved voyage still opens on the nameboard, since you live aboard by then. Continue and Start a new voyage keep working (#151). Where "who are you" is asked is open.

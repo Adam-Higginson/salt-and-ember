@@ -6,6 +6,11 @@ extends StaticBody3D
 ## ([Flicker]) is the warmest light aboard. Steam comes from the pans cooking
 ## on its hobs ([PanFeel]), not from the hearth itself (#204).
 ##
+## It can be left down to its last embers (#249: the ship starts dark): the
+## tongues of flame and the painted fire are out, the firelight is low, and
+## Interact asks the lantern for a little of his own flame. See
+## [method await_flame] and [method light].
+##
 ## The flames (#207) are tongues drawn by a shader ([code]hearth_flame[/code]),
 ## standing on the logs and always facing you. The embers and smoke are
 ## particle systems. All are built here in code, so
@@ -19,6 +24,10 @@ extends StaticBody3D
 ## height, in metres: a big one in the middle and two smaller either side.
 const TONGUES: Array[Vector4] = [Vector4(0.0, 0.0, 0.34, 0.46), Vector4(-0.12, 0.0, 0.24, 0.32),
 		Vector4(0.12, 0.0, 0.22, 0.3)]
+## Emitted when the player asks the lantern to light the stove (only while
+## it's waiting for a flame).
+signal flame_asked(player: Player3D)
+
 const FLAME_SHADER: Shader = preload("res://shaders/hearth_flame.gdshader")
 
 ## How far behind the FlameSpot the flames stand, into the mouth, in metres.
@@ -28,10 +37,23 @@ const FLAME_SHADER: Shader = preload("res://shaders/hearth_flame.gdshader")
 ## Puffs of smoke a second from the chimney.
 @export var smoke_rate: float = 5.0
 
+## How bright the firelight is on its last embers, as a share of its usual.
+@export_range(0.0, 1.0) var ember_level: float = 0.18
+
+## Whether the fire is burning. Down to embers, it isn't.
+var burning: bool:
+	get:
+		return _burning
+
+var _burning: bool = true
 var _flames: Node3D = null
 var _embers: GPUParticles3D = null
 var _smoke: GPUParticles3D = null
 
+@onready var _fire_light: Flicker = $FireLight
+## The greybox's painted fire, which the Meshy hearth replaces (so it may be gone).
+@onready var _fire: MeshInstance3D = get_node_or_null("Fire") as MeshInstance3D
+@onready var _reach: Interactable3D = $Reach
 @onready var _flame_spot: Marker3D = $FlameSpot
 @onready var _ember_spot: Marker3D = $EmberSpot
 @onready var _smoke_spot: Marker3D = $SmokeSpot
@@ -44,6 +66,33 @@ func _ready() -> void:
 	_ember_spot.add_child(_embers)
 	_smoke = _make_smoke()
 	_smoke_spot.add_child(_smoke)
+	_reach.enabled = false
+	_reach.interacted.connect(func(player: Player3D) -> void: flame_asked.emit(player))
+	_reach.describe_interact = func(_player: Player3D) -> String:
+		return "Ask him to light the stove"
+
+
+## Lets the fire sink to its last embers and waits for a flame: Interact
+## now asks the lantern to light it ([signal flame_asked]).
+func await_flame() -> void:
+	_burning = false
+	_reach.enabled = true
+	_show_fire(ember_level)
+
+
+## Lights the fire again, at once: the flames, the painted fire and the
+## firelight all come up. (A fade is [method set_fire_level].)
+func light() -> void:
+	_burning = true
+	_reach.enabled = false
+	_show_fire(1.0)
+
+
+## Sets how strongly the fire burns, 0 to 1, for a fade between embers and
+## flame. At 1 it counts as burning.
+func set_fire_level(level: float) -> void:
+	_show_fire(level)
+	_burning = level >= 1.0
 
 
 ## The flames rising from the logs.
@@ -59,6 +108,14 @@ func embers() -> GPUParticles3D:
 ## The smoke from the chimney, up on deck.
 func smoke() -> GPUParticles3D:
 	return _smoke
+
+
+func _show_fire(level: float) -> void:
+	_fire_light.level = level
+	_fire_light.visible = level > 0.0
+	_flames.visible = level > 0.5
+	if is_instance_valid(_fire):
+		_fire.visible = level > 0.5
 
 
 func _make_flames() -> Node3D:

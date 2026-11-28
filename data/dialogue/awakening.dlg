@@ -1,0 +1,28 @@
+# The ship comes alive (#249): the lantern lights the galley stove with a
+# little of his own flame. Played by the ShipAwakening node in
+# scenes/prototype/sea.tscn when you ask him at the stove. Placeholder
+# writing: rewrite freely. His murmurs while you look for the stove, and the
+# captain's few words, are in scripts/story/ship_awakening.gd and heron.dlg.
+#
+# The flag stove_lit is what lights it: setting it makes the flame pass, the
+# lights come up from the galley outwards, and him go dimmer.
+
+~ start
+-> stove
+
+~ stove
+@go lantern stove_flame
+@look lantern determined
+lantern: ...Stove. Of course.
+@wait 0.6
+lantern: Just a little. It doesn't hurt.
+@look lantern effort
+@wait 0.8
+set stove_lit
+@wait 1.6
+@look lantern tired
+lantern: ...There.
+lantern: ...Oh. That's... a bit dimmer than I'd planned.
+@wait 0.6
+lantern: Don't let it go out.
+@home lantern
