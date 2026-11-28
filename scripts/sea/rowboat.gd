@@ -65,6 +65,11 @@ signal stroked
 ## How far the blades dip into the water on the drive, in degrees.
 @export var oar_dip_degrees: float = 9.0
 
+## How far the boat has tipped over, in radians about its length: 0 upright,
+## about 1.9 on its side and keeled over (the capsize, #230). Added to the
+## swell's own roll; the opening's cutscene tweens it.
+var capsize_roll: float = 0.0
+
 ## How fast the boat is moving over the ground, as x and z in metres per second.
 var velocity: Vector2 = Vector2.ZERO
 ## Which way the bow points: radians about Y, 0 facing -Z.
@@ -133,7 +138,7 @@ func row(pull: float, turn: float, delta: float) -> void:
 func ride() -> void:
 	var sea: Sea = _find_sea()
 	if sea == null:
-		basis = Basis.from_euler(Vector3(0.0, heading, 0.0))
+		basis = Basis.from_euler(Vector3(0.0, heading, capsize_roll))
 		return
 	var forward: Vector2 = forward_of(heading)
 	var right: Vector2 = right_of(heading)
@@ -145,7 +150,7 @@ func ride() -> void:
 	global_position.y = (bow + stern + port + starboard) / 4.0 + float_height
 	var tilt: Vector2 = tilt_from_heights(bow, stern, port, starboard, half_size,
 			deg_to_rad(max_tilt_degrees))
-	basis = Basis.from_euler(Vector3(tilt.x, heading, tilt.y))
+	basis = Basis.from_euler(Vector3(tilt.x, heading, tilt.y + capsize_roll))
 
 
 ## How much of the steering is still yours, 0 to 1: everything the current

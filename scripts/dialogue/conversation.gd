@@ -66,6 +66,8 @@ var _runner: DialogueRunner = DialogueRunner.new()
 var _active: bool = false
 var _tree_id: StringName = &""
 var _player: Player3D = null
+## Whether it began with a player, who must still be there for it to go on.
+var _expects_player: bool = false
 var _speaker: Crewmate = null
 var _selected: int = 0
 var _people: Catalog = Catalog.load_default()
@@ -106,8 +108,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if not _active:
 		return
-	# Whoever you were talking to has gone (a scene change): let go.
-	if not is_instance_valid(_player):
+	# Whoever you were talking to has gone (a scene change): let go. (A
+	# cutscene begun with nobody, like the one in the Grave, has no one to lose.)
+	if _expects_player and not is_instance_valid(_player):
 		_runner.stop()
 		return
 	# A handler that's gone can't release its hold: do it for them, or the
@@ -365,6 +368,7 @@ func _start(tree: DialogueTree, player: Player3D, speaker: Crewmate, from: Strin
 	_holds.clear()
 	_tree_id = tree.id
 	_player = player
+	_expects_player = player != null
 	_speaker = speaker
 	_last_tree = tree
 	_last_section = from

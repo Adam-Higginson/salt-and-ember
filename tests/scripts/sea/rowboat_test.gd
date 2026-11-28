@@ -66,6 +66,21 @@ func test_with_controls_off_the_stick_does_nothing() -> void:
 	assert_bool(boat.is_stroking()).is_false()
 
 
+func test_capsizing_rolls_the_boat_over_on_top_of_the_swell() -> void:
+	var boat: Rowboat = _boat_in_world()
+	var runner: GdUnitSceneRunner = scene_runner(boat.get_parent())
+	await physics_ticks(runner, 3)
+	# Level, its up is straight up.
+	assert_float(boat.global_basis.y.dot(Vector3.UP)).is_greater(0.999)
+
+	boat.capsize_roll = deg_to_rad(90.0)
+	await physics_ticks(runner, 3)
+
+	# On its side: its up is level, and the bow still points the same way.
+	assert_float(absf(boat.global_basis.y.dot(Vector3.UP))).is_less(0.01)
+	assert_float(boat.global_basis.z.dot(Vector3.BACK)).is_greater(0.99)
+
+
 func test_letting_go_finishes_the_stroke_then_rests_the_oars() -> void:
 	var boat: Rowboat = _boat_in_world()
 	var runner: GdUnitSceneRunner = scene_runner(boat.get_parent())

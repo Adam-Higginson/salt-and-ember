@@ -85,6 +85,16 @@ func cover_now() -> void:
 	show()
 
 
+## Makes the screen white at once, with no fade, stopping any fade under way:
+## for ending on a whiteout.
+func cover_white_now() -> void:
+	if _tween != null:
+		_tween.kill()
+	_black.modulate.a = 1.0
+	_black.color = Color.WHITE
+	show()
+
+
 ## Uncovers the screen at once, with no fade, and puts any title away.
 func uncover_now() -> void:
 	if _tween != null:

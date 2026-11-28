@@ -823,3 +823,15 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 **Input Map.** The project names actions independently of their buttons so scripts and prompts can use the same binding. The Journal action comes from the Input Map and the HUD reads its key or controller button.
 
 **Sampling an animation.** An animation can set a property to a point on another clip's timeline. The waking scene samples the imported lying and sitting clips on its cutscene stand-ins so it can cut from the bunk to Lantern and back.
+
+## Into the Grave, the capsize and the rescue (#230)
+
+**A cutscene with no player.** A `Conversation` can play a script for `null`: nobody is told to stop walking, and it doesn't stop itself because there's no one to lose. Its cues still work. *Ours:* `IntoTheGrave` plays his lines with only a boat in the world.
+
+**A scene that starts part-way through a story.** `IntoTheGrave` begins "already swept in" and has a `begin()` for whatever comes before it to call, plus `begin_on_start` so it can also run by itself on F6. A beat built this way can be tested and tuned alone, then joined to its neighbours later.
+
+**Moving a node to a new parent.** `reparent(new_parent, keep_global_transform)` moves a node in the tree without it jumping. *Ours:* the lantern's light is handed from the bow pole to the lantern when the Grave pulls him off, so it goes into the water with him.
+
+**Adding to a node's pose.** The rowboat's `ride()` rebuilds its rotation from the sea every tick, so a script can't just turn the node. It keeps a `capsize_roll` in radians and adds it to the roll it works out, and the cutscene tweens that one number to tip the boat over.
+
+**Tweens that know when they're done.** `await tween.finished` waits for a whole chain of steps. Killing a tween (starting a new one over it) means it never finishes, so each part of the beat keeps its own tween if it has to outlive the next. *Ours:* the Grave's lights come up over the whole reveal on one tween, the pull and the capsize each use `_new_tween()`.

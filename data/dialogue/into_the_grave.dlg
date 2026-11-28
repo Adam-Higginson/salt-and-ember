@@ -1,0 +1,188 @@
+# The opening's fourth beat (#230): swept through the fog into the Grave of
+# the Lanterns, the pull, and the rescue in the deep. Played by IntoTheGrave
+# (scripts/intro/into_the_grave.gd, scenes/prototype/intro/into_the_grave.tscn).
+# Placeholder writing: rewrite freely.
+#
+# There are two parts, each its own conversation the scene starts:
+# - start runs while you drift over the Grave, rowing taken from you.
+#   You can turn the camera while it plays. It ends on the ringing; then the
+#   scene takes him off the pole itself, and offers "Reach for him".
+# - the_rescue is the rescue as built in intro.dlg (#183), with the same
+#   pictures (scenes/prototype/intro/underwater.tscn), but his lines are for
+#   a friend: you went in after him, and in the deep, spent from the Grave's
+#   pull, he still finds you and gives you nearly all his light. (intro.dlg
+#   still has the stranger's version, for the old opening, until this beat is
+#   joined to the chain breaking, #229, and the ship finding you, #231.)
+#
+# Looks: bow_lantern is the lantern on the rowboat's pole, sinking_lantern is
+# the one in the water. His looks are listed in scripts/companion/lantern_face.gd.
+
+# Lights below, coming up. He's thrilled: he thinks it's home.
+~ start
+@look bow_lantern pleased
+@wait 1.5
+lantern: There you are...
+@wait 0.6
+lantern: Look! Lights, all the way down.
+lantern: I knew there'd be somewhere. I knew it.
+-> the_dead
+
+# The nearest lights are cold. The camera looks down at them (the Grave's own
+# set, scenes/prototype/intro/grave.tscn, its clips over_the_grave and
+# that_one): dead lanterns, thousands of them, caught in great chains. He says
+# what they are, short and stunned, and doesn't explain. Then, from far below,
+# the ringing.
+~ the_dead
+@look bow_lantern surprised
+@stage grave
+@play over_the_grave
+lantern: Wait...
+@play that_one
+@look bow_lantern worried
+lantern: These are... they're lanterns.
+lantern: Like me. They're all...
+@wait 1.6
+@stage off
+@wait 1.0
+lantern: ...Oh.
+@wait 0.8
+@sound ring
+@wait 1.6
+lantern: That sound. Do you hear it?
+@look bow_lantern pleading
+
+# The dark. The water closes over, and a long way above, a bell: the first
+# thing that isn't the Grave. (The screen is black from the capsize.)
+~ the_rescue
+@stage underwater cut
+@muffle on
+@sound bell
+@fade in 1.0
+-> light
+
+# A small warm thing comes through the surface, a long way off, and drives
+# down through the dark to you. It's dimmer than it was: the Grave has had a
+# lot of it already. His light finds dim shapes hanging all round: lanterns.
+~ light
+@stage underwater cut
+@muffle on
+@look sinking_lantern determined
+@look sinking_lantern clear
+@look sinking_lantern mended
+@play lantern_appears
+@play lantern_drives
+@look sinking_lantern tired
+@play lantern_arrives
+-> finds_you
+
+# He dips to look for a response. You don't answer.
+~ finds_you
+@stage underwater cut
+@muffle on
+@look sinking_lantern surprised
+lantern: You came in after me?
+@look sinking_lantern worried
+lantern: You can't swim in this. Nobody can.
+@play searches_your_face
+lantern: Oh, don't go quiet on me. Not you.
+-> tries
+
+# He gets under you and heaves, and you go on sinking: there's too little of
+# him left to lift you. He looks up at the surface, so far above, and back at
+# you.
+~ tries
+@stage underwater cut
+@muffle on
+@look sinking_lantern effort
+@say_in 1.2 lantern 2.4 Come on. Come on!
+@play heaves
+@look sinking_lantern worried
+@play looks_up
+@look sinking_lantern determined
+lantern: Hold on. I've still got something.
+-> reach
+
+# A flame can't reach through glass, so he opens his own door and his flame
+# comes out into the shape of a hand, and holds it out to you. It waits for as
+# long as it takes. You can take it at any moment.
+~ reach
+@stage underwater cut
+@muffle on
+@look sinking_lantern effort
+@play opens_door
+@look sinking_lantern determined
+@start reaches_out
+@queue offered
+@say_in 1.6 lantern 2.6 Here. Take my hand.
+@wait_for interact Take his hand
+@sound grasp
+@look sinking_lantern calm
+@play taken
+-> it_catches
+
+# The touch. A strange note through the water. He freezes, and his flame
+# flares brighter.
+~ it_catches
+@stage underwater cut
+@muffle on
+@look sinking_lantern surprised
+@play catches
+lantern: Oh...
+-> it_flows
+
+# The light runs out of his hand into yours, along your arm, and you begin to
+# glow. And a thinner thread of it sinks away from him, down to the dead
+# lanterns far below (the Drain node): they're drawing on him too, and have
+# been since the pole. He tries to pull away, and it holds, and his flame
+# shrinks (#203).
+~ it_flows
+@stage underwater cut
+@muffle on
+@look sinking_lantern worried
+@play flows
+lantern: The lanterns down there...
+lantern: they've been calling my light since the pole.
+@look sinking_lantern effort
+@play pulls_back
+@look sinking_lantern pleading
+lantern: I can't...
+lantern: I can't hold on to it.
+-> the_deep_stirs
+
+# All round, the dead lanterns flicker. A deep rumble. He looks down:
+# something enormous shifts in the dark below, passing beneath the chains,
+# shown only in the lightning.
+~ the_deep_stirs
+@stage underwater cut
+@muffle on
+@look sinking_lantern surprised
+@start stirs
+@wait 1.4
+@hush on
+@sound deep_note
+@wait 1.6
+@lightning
+@wait 2.2
+@lightning
+@wait 2.8
+@hush off
+-> lets_go
+
+# He looks back at you, almost out. He chooses, and lets the last of it go:
+# a burst of gold that fills everything. White. Silence. The scene ends here,
+# on the white: what comes next is the ship finding you (#231).
+~ lets_go
+@stage underwater cut
+@muffle on
+@look sinking_lantern tired
+@play looks_back
+lantern: You came in after me.
+lantern: So I'm not letting go of you, either.
+@look sinking_lantern determined
+@start lets_go
+@wait 1.2
+@hush on
+@fade white 1.2
+@stage off
+@muffle off
+@wait 2.5

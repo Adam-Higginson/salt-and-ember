@@ -66,6 +66,23 @@ func test_it_can_start_at_a_later_section() -> void:
 	assert_str(String(_conversation.section())).is_equal("last")
 
 
+func test_a_cutscene_can_play_with_nobody_in_the_world() -> void:
+	# The Grave's cutscene (#230) has a boat and no player: it must keep
+	# going rather than stopping because there's no one to lose.
+	_build()
+	var runner: GdUnitSceneRunner = scene_runner(_player.get_parent())
+	await physics_ticks(runner, 3)
+	var tree: DialogueTree = DialogueScript.parse(SECTIONS, &"test")
+
+	assert_bool(_conversation.play_tree(tree, null)).is_true()
+	await physics_ticks(runner, 10)
+
+	assert_bool(_conversation.is_active()).is_true()
+	assert_array(_said).contains_exactly(["Start."])
+	_conversation.press()
+	assert_array(_said).contains_exactly(["Start.", "Two."])
+
+
 func test_a_section_that_isnt_there_starts_nothing() -> void:
 	_build()
 	var runner: GdUnitSceneRunner = scene_runner(_player.get_parent())
