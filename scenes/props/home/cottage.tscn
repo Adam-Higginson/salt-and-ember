@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Material" path="res://assets/placeholder/materials/window_glow.tres" id="12_glow"]
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="13_meshy"]
 
 [sub_resource type="StandardMaterial3D" id="Wall"]
 albedo_color = Color(0.86, 0.8, 0.74, 1)
@@ -9,6 +10,11 @@ roughness = 0.9
 
 [sub_resource type="StandardMaterial3D" id="Roof"]
 albedo_color = Color(0.56, 0.22, 0.2, 1)
+metallic = 0
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Stone"]
+albedo_color = Color(0.5, 0.45, 0.42, 1)
 metallic = 0
 roughness = 0.9
 
@@ -73,7 +79,11 @@ size = Vector3(0.8, 2.4, 0.8)
 [sub_resource type="BoxMesh" id="Window"]
 size = Vector3(0.9, 0.9, 0.1)
 
+[sub_resource type="BoxMesh" id="Foundation"]
+size = Vector3(5.6, 4.8, 4.4)
+
 [node name="Cottage" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/cottage, drawn by the Model node. Attach points: SmokeOut (the chimney top; the Smoke particles hang from it) and the two window glows (WindowUpper, WindowLower; the model's glass is dark, so the glow is ours, with WindowLight). The greybox shows when the art is missing."
 
 [node name="Body" type="MeshInstance3D" parent="."]
 position = Vector3(0, -1.5, 0)
@@ -86,33 +96,50 @@ material_override = SubResource("Roof")
 mesh = SubResource("RoofShape")
 
 [node name="Chimney" type="MeshInstance3D" parent="."]
-position = Vector3(1.8, 5.6, -1)
+position = Vector3(1.75, 5.6, 0.85)
 material_override = SubResource("Wall")
 mesh = SubResource("Chimney")
 
-[node name="WindowLeft" type="MeshInstance3D" parent="."]
-position = Vector3(-1.5, 2.2, 2.52)
+[node name="WindowUpper" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.87, 0, 0, 0, 0.87, 0, 0, 0, 1, 0.13, 3, 2.5)
 cast_shadow = 0
+transparency = 0.55
 material_override = ExtResource("12_glow")
 mesh = SubResource("Window")
 
-[node name="WindowRight" type="MeshInstance3D" parent="."]
-position = Vector3(1.5, 2.2, 2.52)
+[node name="WindowLower" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.87, 0, 0, 0, 0.8, 0, 0, 0, 1, 1.33, 0.45, 2.5)
 cast_shadow = 0
+transparency = 0.55
 material_override = ExtResource("12_glow")
 mesh = SubResource("Window")
 
 [node name="WindowLight" type="OmniLight3D" parent="."]
-position = Vector3(0, 2.2, 3.6)
+position = Vector3(0.7, 1.8, 3.6)
 light_color = Color(1, 0.66, 0.36, 1)
 light_energy = 1.2
 omni_range = 7.0
 
-[node name="Smoke" type="GPUParticles3D" parent="."]
-position = Vector3(1.8, 7, -1)
+[node name="SmokeOut" type="Marker3D" parent="."]
+position = Vector3(1.75, 6.9, 0.85)
+
+[node name="Smoke" type="GPUParticles3D" parent="SmokeOut"]
 amount = 16
 lifetime = 7.0
 preprocess = 7.0
 visibility_aabb = AABB(-4, -1, -4, 8, 14, 8)
 process_material = SubResource("SmokeRise")
 draw_pass_1 = SubResource("Puff")
+
+[node name="Foundation" type="MeshInstance3D" parent="."]
+position = Vector3(0, -4.6, 0)
+material_override = SubResource("Stone")
+mesh = SubResource("Foundation")
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+position = Vector3(0, -2.2, 0)
+script = ExtResource("13_meshy")
+path = "res://assets/third_party/meshy/cottage/model/model.glb"
+fit_size = Vector3(6.8, 9, 5.6)
+stretch = true
+stand_ins = [NodePath("../Body"), NodePath("../Roof"), NodePath("../Chimney")]
