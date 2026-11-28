@@ -1,0 +1,64 @@
+[gd_resource type="Terrain3DAssets" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/placeholder/textures/terrain/grass_albedo.png" id="1_os1ff"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/textures/terrain/grass_normal.png" id="2_64fe6"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/textures/terrain/rock_albedo.png" id="3_tutie"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/textures/terrain/rock_normal.png" id="4_7pfcn"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/textures/terrain/wet_rock_albedo.png" id="5_w4133"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/textures/terrain/wet_rock_normal.png" id="6_do1t6"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/textures/terrain/shingle_albedo.png" id="7_7u61y"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/textures/terrain/shingle_normal.png" id="8_x03k8"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/textures/terrain/flagstone_albedo.png" id="9_3vt2l"]
+[ext_resource type="Texture2D" path="res://assets/placeholder/textures/terrain/flagstone_normal.png" id="10_a0sgr"]
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_1yhit"]
+name = "Grass"
+albedo_texture = ExtResource("1_os1ff")
+normal_texture = ExtResource("2_64fe6")
+normal_depth = 0.8
+uv_scale = 0.14285715
+detiling_rotation = 0.4
+detiling_shift = 0.3
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_4xxgt"]
+name = "Purple-grey rock"
+id = 1
+albedo_texture = ExtResource("3_tutie")
+normal_texture = ExtResource("4_7pfcn")
+normal_depth = 0.8
+uv_scale = 0.11111111
+detiling_rotation = 0.4
+detiling_shift = 0.3
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_nvyyn"]
+name = "Wet rock"
+id = 2
+albedo_texture = ExtResource("5_w4133")
+normal_texture = ExtResource("6_do1t6")
+normal_depth = 0.8
+uv_scale = 0.125
+detiling_rotation = 0.4
+detiling_shift = 0.3
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_dw0dn"]
+name = "Shingle"
+id = 3
+albedo_texture = ExtResource("7_7u61y")
+normal_texture = ExtResource("8_x03k8")
+normal_depth = 0.8
+uv_scale = 0.25
+detiling_rotation = 0.4
+detiling_shift = 0.3
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_vio3i"]
+name = "Flagstones"
+id = 4
+albedo_texture = ExtResource("9_3vt2l")
+normal_texture = ExtResource("10_a0sgr")
+normal_depth = 0.8
+uv_scale = 0.33333334
+detiling_rotation = 0.4
+detiling_shift = 0.3
+
+[resource]
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_1yhit"), SubResource("Terrain3DTextureAsset_4xxgt"), SubResource("Terrain3DTextureAsset_nvyyn"), SubResource("Terrain3DTextureAsset_dw0dn"), SubResource("Terrain3DTextureAsset_vio3i")])

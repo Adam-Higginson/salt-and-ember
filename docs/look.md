@@ -109,3 +109,12 @@ Cost (measured with the viewport's GPU timer on an RTX 4090 at 1920x1080, `march
 ## What's not stylised
 
 Only characters get the cel shader and outline. Rooms and props keep their own materials (and so their texture detail), and are drawn into the same palette by the light: the warm sun, the ambient colour, and the tone mapping.
+
+## The home island's land (Terrain3D)
+
+The island is a `Terrain3D` node (`scenes/props/home/home_island.tscn`), seen only from the water, so it is built to read from a rowboat: grassy shoulders on tiered rock cliffs, a winding flagstone path, a shingle cove and beach, wet dark rock and boulders at the waterline.
+
+- **The shape** is `scripts/terrain/home_island_shape.gd`: a cone cut into tiers, then flat shelves for each building, the path's cut, the beach, the cove and the rocks. Every building and lamp keeps its old position, and the shelves and path are pinned to their heights. Change a number, then run `godot_console.exe --headless --path . --script tools/terrain/build_home_island.gd` (add `-- --preview=some.png` for a top-down picture) to sculpt it again. Hand sculpting in the editor is lost when it is run again.
+- **The textures** are in `assets/placeholder/textures/terrain/`, in the terrain's order: 0 grass, 1 purple-grey rock, 2 wet rock, 3 shingle, 4 flagstones (the path). The first four are painted by `tools/terrain/paint_terrain_textures.gd` from seamless noise (run it, then import). The flagstones and the drystone wall are painted pictures made for the island (originals in `tools/terrain/originals/`, shrunk to 512; their bumps are read from their own brightness so they line up with the stones). To change one texture's look, edit its colours in the painter; to change how big its repeats are, change `tile` in `build_home_island.gd` (metres per repeat).
+- **Which texture goes where** is worked out by the build tool: grass on gentle ground, rock where it is steepest, wet rock below about 2 m above the sea, shingle in the cove and on the beach, flagstones on the path. Patches of warm and cool tint and purple heather are in the colour map, and rock gets moss on its upward-facing parts.
+- **Dressing** (`Dressing` node, `scripts/terrain/island_dressing.gd`): greybox trees, heather and drystone walls, set on the ground when the scene starts, for the Meshy kit to replace.

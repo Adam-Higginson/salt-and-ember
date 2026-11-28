@@ -832,6 +832,12 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 
 **Local to scene.** An Environment saved as a `.tres` is shared by everything that loads it. Setting *Local to Scene* gives each scene its own copy, so home waters can change the fog without touching the file. *Ours:* `home_dusk.tres`.
 
+**Terrain and heightmaps.** A *heightmap* is a picture where each pixel's brightness is the ground's height at that spot; the engine turns it into a mesh. Terrain3D (a plugin) keeps its heightmap in *regions* (square tiles, here 256 x 256 vertices, 128 m a side at a vertex every 0.5 m), saved as `.res` files in a folder, and draws it with a clipmap (rings of mesh that get coarser with distance). A second *control map* says which texture each pixel uses (a base, an overlay and a blend between them) and a *colour map* tints it. Textures are a list; each has an albedo picture with its height in the alpha channel and a normal map with its roughness in the alpha. *Ours:* `HomeIslandShape` is the island as a function; `tools/terrain/build_home_island.gd` samples it into the regions in `data/terrain/home_island/`; `scenes/props/home/home_island.tscn` holds the `Terrain3D` node. To sculpt by hand, select the `Terrain` node in that scene and use the toolbar that appears in the 3D viewport.
+
+**GDExtension.** A plugin that is compiled code (a `.dll`, `.so` or macOS framework) rather than GDScript, loaded by a `.gdextension` file that lists one binary per platform and build. It adds engine classes, like `Terrain3D`, that scripts use as if they were built in. The editor must have it, and so must every export, so the binaries for each platform we ship (Windows, Linux for CI, macOS) are committed. *Ours:* `addons/terrain_3d/`.
+
+**Running a script without a scene.** `godot_console.exe --headless --script file.gd` runs a script that `extends SceneTree` as the whole program: `_initialize()` is its start, `quit()` its end. We use it for tools that generate files. *Ours:* `tools/terrain/`.
+
 ## Testing
 
 **gdUnit4.** The test framework (`addons/gdUnit4`). Suites extend our `GameTestSuite` and have `test_...` functions. `scene_runner` loads a scene and lets a test press inputs and wait physics ticks. *Ours:* `tests/`.

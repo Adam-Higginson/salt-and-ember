@@ -43,6 +43,12 @@ The island's bells: "Church Bells Ringing with Birds in the Background"
 by hoshisato (freesound.org/s/852997), CC0.
 
 
+TERRAIN
+Terrain3D 1.1.0 by Cory Petkovsek, Roope Palmroos and contributors
+(github.com/TokisanGames/Terrain3D), MIT licence (addons/terrain_3d/LICENSE.txt).
+It sculpts and draws the home island's land.
+
+
 FONTS
 Cinzel, copyright 2020 The Cinzel Project Authors
 Varela Round, copyright 2023 The Varela Round Project Authors

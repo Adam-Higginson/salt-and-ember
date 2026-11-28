@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Resource" path="res://data/terrain/home_island/assets.tres" id="1_assets"]
+[ext_resource type="Material" path="res://data/terrain/home_island/material.tres" id="2_material"]
+[ext_resource type="Script" path="res://scripts/terrain/island_dressing.gd" id="3_dressing"]
+[ext_resource type="Material" path="res://assets/placeholder/materials/drystone_wall.tres" id="4_wall"]
+
+[node name="HomeIsland" type="Node3D"]
+
+[node name="Terrain" type="Terrain3D" parent="."]
+data_directory = "res://data/terrain/home_island"
+material = ExtResource("2_material")
+assets = ExtResource("1_assets")
+vertex_spacing = 0.5
+collision_mode = 0
+
+[node name="Dressing" type="Node3D" parent="." node_paths=PackedStringArray("terrain")]
+script = ExtResource("3_dressing")
+terrain = NodePath("../Terrain")
+wall_material = ExtResource("4_wall")
