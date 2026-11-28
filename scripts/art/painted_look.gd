@@ -134,6 +134,17 @@ func _ready() -> void:
 	_apply()
 
 
+func _exit_tree() -> void:
+	# The filter hangs off a camera; if it was never hung on one (no camera
+	# yet) nothing else owns it, so free it here.
+	if _filter != null and is_instance_valid(_filter):
+		if _filter.get_parent() == null:
+			_filter.free()
+		else:
+			_filter.queue_free()
+	_filter = null
+
+
 func _process(_delta: float) -> void:
 	if _scenery_material != null and is_instance_valid(stroke_anchor):
 		_scenery_material.set_shader_parameter(&"stroke_space",
