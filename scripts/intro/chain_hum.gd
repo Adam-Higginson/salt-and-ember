@@ -68,7 +68,8 @@ func _physics_process(delta: float) -> void:
 	if not is_humming:
 		return
 	_clock += delta
-	if _clock >= pulse_seconds * (pulse_count + 1):
+	# start_humming() throbs once, so pulse_count throbs are already done.
+	if _clock >= pulse_seconds * pulse_count:
 		_throb()
 
 
