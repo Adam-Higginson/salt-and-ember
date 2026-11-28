@@ -782,6 +782,10 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 
 **A wall for something that isn't a physics body.** A collision shape only stops physics bodies, and the rowboat is moved by script. So the wall is a sum instead: if the boat's inside the circle, put it back on the edge and take away the part of its speed heading in, which leaves it free to slide along. `Geometry2D.get_closest_point_to_segment()` is the same kind of flat sum for "how near a line". *Ours:* `KeepClear` (`scripts/sea/keep_clear.gd`) round the island, the buoy and the chain's foot; `HomeWaters.chain_distance()`.
 
+**Attach points.** A `Marker3D` named for the job (`LanternHook`, `ChainEye`, `SmokeOut`) marks where another part joins a prop. The part is a child of the marker (or reads its position), so swapping a model or moving a joint is one edit and the rest follows. *Ours:* the lamp post's `LanternHook` holds the hanging lantern; the rowboat's `OarlockPort` and `OarlockStarboard` are where its oars pivot; the mooring's `ChainEye` is where the great chain starts. The list for each model is in `docs/meshy.md` (Model library).
+
+**`editor_description`.** A free-text note every node has, shown in the Inspector and saved in the scene, so a scene with no script can still say what it is. *Ours:* each home-waters prop's root names its Meshy model and its attach points.
+
 **Soft particles from a gradient.** A particle drawn as a plain `QuadMesh` is a hard square. A `GradientTexture2D` with `fill` set to Radial makes a soft dot from a gradient (white in the middle, clear at the edge), and as the quad's texture it makes each particle a puff. With *Billboard* set to Particle the quads always face the camera. *Ours:* the chimney smoke over each cottage in `home_waters.tscn`.
 
 ## Testing

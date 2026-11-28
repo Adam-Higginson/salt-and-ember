@@ -1,5 +1,7 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="14_meshy"]
+
 [sub_resource type="StandardMaterial3D" id="Rock"]
 albedo_color = Color(0.4, 0.34, 0.4, 1)
 metallic = 0
@@ -13,35 +15,46 @@ roughness = 0.8
 [sub_resource type="CylinderMesh" id="MooringBase"]
 top_radius = 4.5
 bottom_radius = 6.0
-height = 3.0
+height = 2.0
 radial_segments = 16
 
 [sub_resource type="CylinderMesh" id="MooringPost"]
-top_radius = 1.6
-bottom_radius = 1.8
-height = 4.0
+top_radius = 0.6
+bottom_radius = 0.9
+height = 6.2
 radial_segments = 12
 
 [sub_resource type="TorusMesh" id="MooringRing"]
-inner_radius = 2.6
-outer_radius = 4.2
+inner_radius = 0.5
+outer_radius = 0.85
 rings = 24
 ring_segments = 10
 
 [node name="Mooring" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/mooring, drawn by the Model node (turned so its eye looks out along Z). Attach point: ChainEye, the eye on top of the leaning post, where the great chain's first link passes through (home_waters.tscn starts its Chain there). The greybox shows when the art is missing."
 
 [node name="Base" type="MeshInstance3D" parent="."]
-position = Vector3(0, 1.5, 0)
+position = Vector3(0, 1, 0)
 material_override = SubResource("Rock")
 mesh = SubResource("MooringBase")
 
 [node name="Post" type="MeshInstance3D" parent="."]
-position = Vector3(0, 5, 0)
+transform = Transform3D(0.966, 0.259, 0, -0.259, 0.966, 0, 0, 0, 1, -0.8, 5, 0)
 material_override = SubResource("ChainRust")
 mesh = SubResource("MooringPost")
 
 [node name="Ring" type="MeshInstance3D" parent="."]
-position = Vector3(0, 7.5, -2)
-rotation = Vector3(0, 0, 1.5708)
+position = Vector3(-1.6, 8, 0)
+rotation = Vector3(1.5708, 0, 0)
 material_override = SubResource("ChainRust")
 mesh = SubResource("MooringRing")
+
+[node name="ChainEye" type="Marker3D" parent="."]
+position = Vector3(-1.6, 8, 0)
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+rotation = Vector3(0, -1.5708, 0)
+script = ExtResource("14_meshy")
+path = "res://assets/third_party/meshy/mooring/model/model.glb"
+fit_size = Vector3(12, 9, 12)
+stand_ins = [NodePath("../Base"), NodePath("../Post"), NodePath("../Ring")]

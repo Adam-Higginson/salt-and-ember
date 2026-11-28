@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/dialogue/speaker.gd" id="8_speaker"]
 [ext_resource type="Material" path="res://assets/placeholder/materials/window_glow.tres" id="12_glow"]
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="13_meshy"]
 
 [sub_resource type="StandardMaterial3D" id="Wall"]
 albedo_color = Color(0.86, 0.8, 0.74, 1)
@@ -15,6 +16,11 @@ roughness = 0.9
 
 [sub_resource type="StandardMaterial3D" id="Door"]
 albedo_color = Color(0.2, 0.32, 0.3, 1)
+metallic = 0
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Stone"]
+albedo_color = Color(0.5, 0.45, 0.42, 1)
 metallic = 0
 roughness = 0.9
 
@@ -82,7 +88,11 @@ size = Vector3(2.4, 1.6, 0.1)
 [sub_resource type="BoxMesh" id="DoorShape"]
 size = Vector3(1.1, 2.0, 0.1)
 
+[sub_resource type="BoxMesh" id="Foundation"]
+size = Vector3(7.4, 3, 5.6)
+
 [node name="JettyCottage" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/jetty_cottage, drawn by the Model node. Attach points: LanternHook (the empty bracket by the door), SmokeOut (the chimney top; Smoke hangs from it), SiblingVoice (where the sibling calls from) and BigWindow (the glow in the shuttered window, with WindowLight). The greybox shows when the art is missing."
 
 [node name="Body" type="MeshInstance3D" parent="."]
 position = Vector3(0, -1.5, 0)
@@ -95,13 +105,14 @@ material_override = SubResource("Roof")
 mesh = SubResource("RoofShape")
 
 [node name="Chimney" type="MeshInstance3D" parent="."]
-position = Vector3(1.8, 5.6, -1)
+position = Vector3(3.25, 4.0, -0.3)
 material_override = SubResource("Wall")
 mesh = SubResource("Chimney")
 
 [node name="BigWindow" type="MeshInstance3D" parent="."]
-position = Vector3(-0.9, 2, 2.52)
+transform = Transform3D(0.66, 0, 0, 0, 0.74, 0, 0, 0, 1, -1.73, 1.75, 2.3)
 cast_shadow = 0
+transparency = 0.55
 material_override = ExtResource("12_glow")
 mesh = SubResource("BigWindow")
 
@@ -111,21 +122,38 @@ material_override = SubResource("Door")
 mesh = SubResource("DoorShape")
 
 [node name="WindowLight" type="OmniLight3D" parent="."]
-position = Vector3(-0.9, 2, 3.6)
+position = Vector3(-1.73, 1.75, 4.2)
 light_color = Color(1, 0.66, 0.36, 1)
 light_energy = 2.2
 omni_range = 10.0
 
 [node name="SiblingVoice" type="Marker3D" parent="."]
-position = Vector3(-0.9, 3.4, 3.2)
+position = Vector3(-1.73, 3.15, 3.3)
 script = ExtResource("8_speaker")
 who = &"sibling"
 
-[node name="Smoke" type="GPUParticles3D" parent="."]
-position = Vector3(1.8, 7, -1)
+[node name="SmokeOut" type="Marker3D" parent="."]
+position = Vector3(3.25, 5.4, -0.3)
+
+[node name="Smoke" type="GPUParticles3D" parent="SmokeOut"]
 amount = 16
 lifetime = 7.0
 preprocess = 7.0
 visibility_aabb = AABB(-4, -1, -4, 8, 14, 8)
 process_material = SubResource("SmokeRise")
 draw_pass_1 = SubResource("Puff")
+
+[node name="LanternHook" type="Marker3D" parent="."]
+position = Vector3(1.9, 2.4, 2.5)
+
+[node name="Foundation" type="MeshInstance3D" parent="."]
+position = Vector3(0, -1.5, 0)
+material_override = SubResource("Stone")
+mesh = SubResource("Foundation")
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+script = ExtResource("13_meshy")
+path = "res://assets/third_party/meshy/jetty_cottage/model/model.glb"
+fit_size = Vector3(8.11, 5.23, 6.27)
+stretch = true
+stand_ins = [NodePath("../Body"), NodePath("../Roof"), NodePath("../Chimney"), NodePath("../Door")]
