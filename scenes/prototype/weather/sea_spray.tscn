@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sea/sea_spray.gd" id="1_script"]
+[ext_resource type="Shader" path="res://shaders/sea_spray.gdshader" id="2_process"]
+[ext_resource type="Shader" path="res://shaders/spray_drop.gdshader" id="3_drop"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_process"]
+shader = ExtResource("2_process")
+shader_parameter/radius = 10.0
+shader_parameter/crest_from = 0.3
+shader_parameter/post_share = 0.3
+shader_parameter/post_from = 0.15
+shader_parameter/burst_seconds = 0.35
+shader_parameter/bursts = 12
+shader_parameter/lift = 3.2
+shader_parameter/blow = 2.0
+shader_parameter/gravity = 6.0
+shader_parameter/sizes = Vector2(0.2, 0.5)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_dab"]
+seed = 5
+frequency = 0.08
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_dab"]
+width = 64
+height = 64
+noise = SubResource("FastNoiseLite_dab")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_drop"]
+render_priority = 1
+shader = ExtResource("3_drop")
+shader_parameter/cool_color = Color(0.72, 0.7, 0.88, 1)
+shader_parameter/warm_color = Color(1, 0.68, 0.38, 1)
+shader_parameter/sun_direction = Vector3(-0.37, 0.055, -0.93)
+shader_parameter/strength = 0.85
+shader_parameter/dab_noise = SubResource("NoiseTexture2D_dab")
+
+[sub_resource type="QuadMesh" id="QuadMesh_drop"]
+material = SubResource("ShaderMaterial_drop")
+
+[node name="SeaSpray" type="GPUParticles3D"]
+cast_shadow = 0
+amount = 320
+lifetime = 1.2
+fixed_fps = 0
+visibility_aabb = AABB(-24, -3, -24, 48, 9, 48)
+process_material = SubResource("ShaderMaterial_process")
+draw_pass_1 = SubResource("QuadMesh_drop")
+script = ExtResource("1_script")

@@ -3,6 +3,7 @@ extends GameTestSuite
 ## with the water shader.
 
 const NIGHT_SWELL: WaveSettings = preload("res://data/sea/night_swell.tres")
+const DUSK_SWELL: WaveSettings = preload("res://data/sea/dusk_swell.tres")
 
 
 func test_a_sea_with_no_layers_is_flat() -> void:
@@ -80,6 +81,46 @@ func test_steepness_is_limited_so_the_surface_never_folds() -> void:
 	layer.amplitude = 3.0
 	layer.steepness = 1.0
 	assert_float(layer.sideways() * layer.wave_number() * layer.amplitude).is_less_equal(1.0001)
+
+
+func test_a_peaked_layer_is_as_sharp_as_its_peak() -> void:
+	var layer: WaveLayer = WaveLayer.new()
+	layer.wavelength = 16.0
+	layer.amplitude = 0.3
+	layer.peak = 0.4
+	assert_float(layer.sharpness()).is_equal_approx(0.4, 0.0001)
+	# Whatever its size: the same peak on a bigger wave is just as sharp.
+	layer.amplitude = 1.2
+	assert_float(layer.sharpness()).is_equal_approx(0.4, 0.0001)
+
+
+func test_without_a_peak_the_older_steepness_still_rules() -> void:
+	var layer: WaveLayer = WaveLayer.new()
+	layer.wavelength = 40.0
+	layer.amplitude = 1.0
+	layer.steepness = 0.3
+	assert_float(layer.sideways()).is_equal_approx(0.3, 0.0001)
+	assert_bool(NIGHT_SWELL.is_peaked()).is_false()
+
+
+func test_the_dusk_swell_is_peaked_but_never_folds() -> void:
+	assert_bool(DUSK_SWELL.is_peaked()).is_true()
+	var sharpest: float = 0.0
+	for layer: WaveLayer in DUSK_SWELL.used_layers():
+		sharpest += layer.sharpness()
+	# Where every crest meets, the surface still mustn't fold over.
+	assert_float(sharpest).is_less(1.0)
+	assert_float(sharpest).is_greater(0.5)
+
+
+func test_height_on_peaked_waves_finds_the_point_carried_there() -> void:
+	for i: int in 40:
+		var spot: Vector2 = Vector2(i * 1.37 - 20.0, i * -0.91 + 7.0)
+		var time: float = i * 0.29
+		var still: Vector2 = Waves.still_point(DUSK_SWELL, spot, time)
+		var landed: Vector3 = Waves.offset(DUSK_SWELL, still, time)
+		assert_float((still + Vector2(landed.x, landed.z)).distance_to(spot)).is_less(0.01)
+		assert_float(Waves.height_at(DUSK_SWELL, spot, time)).is_equal_approx(landed.y, 0.0001)
 
 
 func test_only_four_layers_are_used() -> void:
