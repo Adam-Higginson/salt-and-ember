@@ -92,7 +92,7 @@ size = Vector3(1.1, 2.0, 0.1)
 size = Vector3(7.4, 3, 5.6)
 
 [node name="JettyCottage" type="Node3D"]
-editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/jetty_cottage, drawn by the Model node. Attach points: LanternHook (the empty bracket by the door), SmokeOut (the chimney top; Smoke hangs from it), SiblingVoice (where the sibling calls from) and BigWindow (the glow in the shuttered window, with WindowLight). The greybox shows when the art is missing."
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/jetty_cottage, drawn by the Model node. Attach points: LanternHook (the empty bracket by the door), SmokeOut (the chimney top; Smoke hangs from it), SiblingVoice (where the sibling calls from) and BigWindow (the glow in the shuttered window, with WindowLight). The greybox shows when the art is missing, with its own window (BigWindowGreybox) on the body's face, since the model's glow sits inside the greybox wall."
 
 [node name="Body" type="MeshInstance3D" parent="."]
 position = Vector3(0, -1.5, 0)
@@ -111,6 +111,13 @@ mesh = SubResource("Chimney")
 
 [node name="BigWindow" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.66, 0, 0, 0, 0.74, 0, 0, 0, 1, -1.73, 1.75, 2.3)
+cast_shadow = 0
+transparency = 0.55
+material_override = ExtResource("12_glow")
+mesh = SubResource("BigWindow")
+
+[node name="BigWindowGreybox" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.66, 0, 0, 0, 0.74, 0, 0, 0, 1, -1.73, 1.75, 2.56)
 cast_shadow = 0
 transparency = 0.55
 material_override = ExtResource("12_glow")
@@ -156,4 +163,4 @@ script = ExtResource("13_meshy")
 path = "res://assets/third_party/meshy/jetty_cottage/model/model.glb"
 fit_size = Vector3(8.11, 5.23, 6.27)
 stretch = true
-stand_ins = [NodePath("../Body"), NodePath("../Roof"), NodePath("../Chimney"), NodePath("../Door")]
+stand_ins = [NodePath("../Body"), NodePath("../Roof"), NodePath("../Chimney"), NodePath("../Door"), NodePath("../BigWindowGreybox")]

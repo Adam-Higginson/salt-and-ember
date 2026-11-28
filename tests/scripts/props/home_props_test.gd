@@ -85,3 +85,28 @@ func _new_scene(path: String) -> Node:
 	add_child(node)
 	auto_free(node)
 	return node
+
+
+func test_the_cottage_windows_show_in_front_of_the_greybox_wall() -> void:
+	# With no art the Body stays visible, so each window glow must sit out
+	# past its front face (z = 2.5) or the wall hides it.
+	var windows: Dictionary[String, Array] = {
+		"cottage.tscn": ["WindowUpper", "WindowLower"],
+		"jetty_cottage.tscn": ["BigWindowGreybox"],
+	}
+	for file: String in windows:
+		var prop: Node3D = _new_scene(HOME + file) as Node3D
+		var model: ThirdPartyModel = prop.find_children("*", "ThirdPartyModel", true, false)[0]
+		model.path = ""  # no art, even on a machine that has it
+		var body: MeshInstance3D = prop.get_node("Body") as MeshInstance3D
+		var box: BoxMesh = body.mesh as BoxMesh
+		var front: float = body.position.z + box.size.z / 2.0
+		assert_bool(body.visible).is_true()
+		for window_name: String in windows[file]:
+			var window: MeshInstance3D = prop.get_node(window_name) as MeshInstance3D
+			var window_box: BoxMesh = window.mesh as BoxMesh
+			var window_front: float = window.position.z \
+					+ window_box.size.z * window.scale.z / 2.0
+			assert_bool(window.visible).is_true()
+			assert_float(window_front).override_failure_message(
+					"%s/%s is behind the wall" % [file, window_name]).is_greater(front)
