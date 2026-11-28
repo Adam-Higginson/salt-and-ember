@@ -33,6 +33,10 @@ const SURFACE: Dictionary[StringName, Variant] = {
 ## The scene's environment. Left empty, the first WorldEnvironment in the
 ## scene is used.
 @export var world: WorldEnvironment
+## On: the scene's own Environment keeps its tone mapping, saturation and
+## glow (it already grades itself, like home waters' dusk), so the look
+## doesn't grade twice. [member saturation] then does nothing.
+@export var keep_scene_grade: bool = false
 @export_group("Picture")
 ## How much richer colours are than the scene's own grade.
 @export_range(0.5, 2.0) var saturation: float = 1.12
@@ -282,17 +286,20 @@ func _apply_environment() -> void:
 			env.set(property, _was[property])
 		_was.clear()
 		return
-	# Filmic keeps bright colours saturated; AgX fades them towards white.
-	_override(env, &"tonemap_mode", Environment.TONE_MAPPER_FILMIC)
-	_override(env, &"tonemap_white", 5.0)
-	_override(env, &"adjustment_enabled", true)
-	_override(env, &"adjustment_saturation", env.adjustment_saturation * saturation)
+	if not keep_scene_grade:
+		# Filmic keeps bright colours saturated; AgX fades them towards white.
+		_override(env, &"tonemap_mode", Environment.TONE_MAPPER_FILMIC)
+		_override(env, &"tonemap_white", 5.0)
+		_override(env, &"adjustment_enabled", true)
+		_override(env, &"adjustment_saturation", env.adjustment_saturation * saturation)
 	# Light bounces between nearby surfaces: lantern light warms the wood
 	# around it. (SDFGI would do more, but it can't follow a moving ship.)
 	_override(env, &"ssil_enabled", true)
 	_override(env, &"ssil_radius", 2.5)
 	_override(env, &"ssil_intensity", 1.2)
 	_override(env, &"ssao_light_affect", 0.0)
+	if keep_scene_grade:
+		return
 	# Only lamps and flames bloom, not every pale thing a lamp shines on.
 	_override(env, &"glow_bloom", 0.02)
 	_override(env, &"glow_intensity", 0.7)

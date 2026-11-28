@@ -28,7 +28,7 @@ uniform vec3 sun_direction = vec3(-0.37, 0.06, -0.93);
 // Sun disc size as an angle in degrees, and how soft its edge is.
 uniform float sun_size : hint_range(0.1, 10.0) = 2.2;
 uniform float sun_softness : hint_range(0.0, 1.0) = 0.5;
-uniform vec4 sun_color : source_color = vec4(1.0, 0.72, 0.42, 1.0);
+uniform vec4 sun_color : source_color = vec4(1.0, 0.66, 0.34, 1.0);
 // Brightness of the sun disc and of the wide warm glow round it. Above 1
 // makes the disc bloom (Environment glow).
 uniform float sun_strength : hint_range(0.0, 8.0) = 3.0;
@@ -41,7 +41,7 @@ group_uniforms sky_colors;
 uniform vec4 zenith_color : source_color = vec4(0.1, 0.07, 0.27, 1.0);
 uniform vec4 high_color : source_color = vec4(0.3, 0.15, 0.5, 1.0);
 uniform vec4 mid_color : source_color = vec4(0.66, 0.34, 0.55, 1.0);
-uniform vec4 horizon_color : source_color = vec4(0.95, 0.46, 0.28, 1.0);
+uniform vec4 horizon_color : source_color = vec4(1.0, 0.42, 0.16, 1.0);
 // The sea haze below the horizon line, which the sky fades into.
 uniform vec4 below_color : source_color = vec4(0.36, 0.25, 0.5, 1.0);
 // How high (0 horizon, 1 straight up) the mid and high colours sit.
@@ -87,8 +87,8 @@ uniform float backlight : hint_range(0.0, 1.5) = 0.45;
 // The four light steps, darkest to brightest.
 uniform vec4 shadow_color : source_color = vec4(0.22, 0.14, 0.38, 1.0);
 uniform vec4 shade_color : source_color = vec4(0.52, 0.29, 0.5, 1.0);
-uniform vec4 lit_color : source_color = vec4(0.97, 0.52, 0.45, 1.0);
-uniform vec4 rim_color : source_color = vec4(1.0, 0.64, 0.44, 1.0);
+uniform vec4 lit_color : source_color = vec4(1.0, 0.5, 0.3, 1.0);
+uniform vec4 rim_color : source_color = vec4(1.0, 0.62, 0.34, 1.0);
 // How much of the sky behind shows through the shadowed side (0 solid paint).
 uniform float shadow_see_through : hint_range(0.0, 1.0) = 0.12;
 

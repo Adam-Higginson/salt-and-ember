@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" path="res://scenes/props/home/cottage.tscn" id="24_cottage"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/lamp_post.tscn" id="25_lamp_post"]
 [ext_resource type="Environment" path="res://data/art/environments/home_dusk.tres" id="26_env"]
+[ext_resource type="Script" path="res://scripts/art/painted_look.gd" id="27_painted"]
 
 [sub_resource type="StandardMaterial3D" id="Rock"]
 albedo_color = Color(0.4, 0.34, 0.4, 1)
@@ -243,3 +244,9 @@ theme_override_font_sizes/font_size = 40
 text = "To be continued..."
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="PaintedLook" type="Node" parent="."]
+script = ExtResource("27_painted")
+keep_scene_grade = true
+haze_color = Color(0.62, 0.46, 0.78, 1)
+haze_strength = 0.4
