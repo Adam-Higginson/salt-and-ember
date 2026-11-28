@@ -255,5 +255,5 @@ vertical_alignment = 1
 [node name="PaintedLook" type="Node" parent="."]
 script = ExtResource("27_painted")
 keep_scene_grade = true
-haze_color = Color(0.59, 0.58, 0.7, 1)
-haze_strength = 0.25
+haze_color = Color(0.45, 0.33, 0.55, 1)
+haze_strength = 0.1

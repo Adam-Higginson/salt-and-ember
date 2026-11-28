@@ -17,6 +17,6 @@ transparency = 1
 blend_mode = 1
 shading_mode = 0
 disable_receive_shadows = true
-albedo_color = Color(1, 0.72, 0.42, 0.55)
+albedo_color = Color(1, 0.68, 0.36, 0.8)
 albedo_texture = SubResource("GradientTexture2D_halo")
 billboard_mode = 1

@@ -15,7 +15,7 @@ radial_segments = 6
 size = Vector3(0.06, 0.06, 0.87)
 
 [sub_resource type="QuadMesh" id="HaloQuad"]
-size = Vector2(2.4, 2.4)
+size = Vector2(3, 3)
 
 [node name="LampPost" type="Node3D"]
 editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/lamp_post, drawn by the Model node (no lantern in the model). Attach point: LanternHook, the hook at the end of the arm, where lantern.tscn hangs (it swings, and its light flickers). The greybox pole and arm show when the art is missing."
