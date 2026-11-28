@@ -78,7 +78,7 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 
 **`get_global_transform_interpolated()`.** Where a physics-interpolated node is *drawn* this frame, rather than where physics last put it. Use it from `_process` to follow a physics body smoothly. *Ours:* `CameraRig._follow_target()`.
 
-**Mouse capture and `InputEventMouseMotion`.** `Input.mouse_mode = Input.MOUSE_MODE_CAPTURED` hides the cursor and locks it to the window, so the mouse can turn the camera forever without hitting the screen edge. Each movement arrives as an `InputEventMouseMotion` whose `relative` is how far it moved. Mouse movement can't be an Input Map action, so the camera reads it in `_unhandled_input`. *Ours:* `CameraRig`. Esc releases the mouse, and a click captures it again.
+**Mouse capture and `InputEventMouseMotion`.** `Input.mouse_mode = Input.MOUSE_MODE_CAPTURED` hides the cursor and locks it to the window, so the mouse can turn the camera forever without hitting the screen edge. Each movement arrives as an `InputEventMouseMotion` whose `relative` is how far it moved. Mouse movement can't be an Input Map action, so the camera reads it in `_unhandled_input`. *Ours:* `CameraRig` and `FollowCamera` (the rowing greybox's chase camera, where `RowingGreybox` captures on a click and frees on Esc). Esc releases the mouse, and a click captures it again.
 
 **Area3D and `body_entered` / `body_exited`.** An invisible volume (shaped by a `CollisionShape3D` child) that notices physics bodies overlapping it, but doesn't block them. It emits `body_entered(body)` when one starts overlapping and `body_exited(body)` when it stops, checked on physics ticks. It notices every body its collision mask covers, so check what came in. *Ours:* `CameraZone` (`scripts/camera/camera_zone.gd`), which reacts only to a `Player3D`.
 
@@ -745,6 +745,74 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 **Clearing a box in a shader.** A shader can `discard` every pixel whose position falls inside a box (passed in as its two corners), carving a model without editing it. *Ours:* `HullShell.clear_boxes` keeps the Meshy hull out of the galley and the bunk room, where its bottom rose through the ceiling.
 
 **Particles that change colour as they age.** A `ParticleProcessMaterial`'s `color_ramp` is a gradient each particle runs along from birth to death, and `scale_curve` does the same for its size. *Ours:* the hearth's flames (`GalleyStove._make_flames`) are born yellow and broad at the logs and die small, red and see-through as they rise.
+
+## Letting Claude see the game (#237)
+
+**EditorPlugin.** A script that extends the Godot editor itself: new docks, buttons, import steps, or (for godot-ai) a connection to an outside program. It lives in `addons/<name>/` with a `plugin.cfg`, and only runs once ticked in *Project → Project Settings → Plugins*, which records it under `[editor_plugins]` in `project.godot`. *Ours:* gdUnit4 and godot-ai.
+
+**An autoload added by a plugin.** A plugin can register an autoload so that a script of its own runs inside the game while it's played from the editor. godot-ai's `_mcp_game_helper` relays screenshots, input and the live scene tree back to the editor. It does nothing outside the editor, and godot-ai's export plugin strips it from builds. *Ours:* `project.godot`'s `[autoload]` section.
+
+**Editor Settings vs Project Settings.** Project Settings belong to the game and are saved in `project.godot`, shared through git. Editor Settings belong to your copy of Godot on this computer (*Editor → Editor Settings*, saved in `%APPDATA%\Godot\editor_settings-4.7.tres`) and apply to every project you open. *Ours:* godot-ai's usage-data switch and excluded tool groups are Editor Settings, so each PC sets them once.
+
+**MCP (Model Context Protocol).** The standard way to give an AI assistant extra tools. A small server offers tools (here: "take a screenshot", "press move_up for 30 frames") and Claude Code calls them. `.mcp.json` tells Claude Code which servers to start for this project. *Ours:* the `godot-ai` server, which talks to the editor plugin over a local, authenticated connection.
+
+## Rowing and the current (#226)
+
+**Moving a node by script instead of physics.** A `RigidBody3D` is pushed around by the physics engine: forces, mass, collisions. It's realistic, but hard to steer and free to tip over. A plain `Node3D` that a script moves each physics tick does exactly what the script says, so it can feel good to control and can never capsize. *Ours:* `Rowboat.row()` works out the boat's velocity and heading from the stick and the water, then moves it; `Rowboat.ride()` sets its height and tilt.
+
+**Framerate-independent smoothing with `exp()`.** `lerpf(now, wanted, 1.0 - exp(-rate * delta))` moves a value towards a target the same amount per second however many frames there are, where a fixed `lerpf(now, wanted, 0.1)` would be faster at higher frame rates. Multiplying by `exp(-drag * delta)` is the same idea for slowing down. *Ours:* the boat's drag and turning (`Rowboat.row()`), and how `FollowCamera` swings round.
+
+**`Basis.from_euler()`.** Builds a rotation from three angles in radians: pitch about X, yaw about Y and roll about Z. *Ours:* `Rowboat.ride()` turns the boat to its heading and tilts it with the swell in one go.
+
+**`rotate_toward()` and `lerp_angle()`.** Angles wrap round (a little past 180 degrees is a little past -180), so they can't be moved with plain `lerpf`. `rotate_toward(from, to, step)` turns by at most `step` the short way round; `lerp_angle(from, to, weight)` blends the short way round. *Ours:* the current swinging the boat's bow round (`Rowboat.row()`), and `FollowCamera` swinging round behind it.
+
+**Exports in groups.** `@export_group("Rowing")` puts the exports after it under a foldable heading in the Inspector, so a node with lots of settings stays readable. *Ours:* `Rowboat`'s Rowing, Turning, Riding the sea and Oars.
+
+**Raw keys in a test scene.** `_unhandled_input` receives every input event nothing else used. Checking `InputEventKey.keycode` against a key like `KEY_C` reads a key directly, without an Input Map action, which is fine for a tuning tool that players never see. *Ours:* `RowingGreybox`: C lets the current take the boat, X gives it back.
+
+## Home waters at dusk (#227)
+
+**A procedural sky.** A `WorldEnvironment` with `background_mode` set to Sky draws a `Sky` whose material paints it. A `ProceduralSkyMaterial` needs no picture: you give it a top colour, a horizon colour and how sharply they blend (`sky_curve`), and it draws the sun where the scene's `DirectionalLight3D` points, with a glow round it (`sun_angle_max`). The sky also lights the scene (`ambient_light_source` = Sky). *Ours:* the violet dusk in `home_waters.tscn`, with the low orange sun beyond the buoy.
+
+**Height fog.** Besides the usual fog that thickens with distance (`fog_density`), an `Environment` can make fog thicker low down: below `fog_height` it gets denser by `fog_height_density`. `fog_sky_affect` says how much the fog covers the sky. *Ours:* the violet mist lying on the water round the island; `HomeWaters` thickens `fog_density` as you row out past home waters.
+
+**Resources local to the scene.** Resources (materials, environments) are shared: every copy of a scene uses the same one, so changing it in one changes them all. Ticking `resource_local_to_scene` gives each copy of the scene its own. *Ours:* the home waters `Environment`, so the fog `HomeWaters` thickens is only that copy's (each test loads a fresh one).
+
+**Physics process priority.** Every node's `_physics_process` runs once a tick, lower `process_physics_priority` first (0 is the default, then tree order). *Ours:* `HomeWaters` sets its own to 10, so it runs after the `Rowboat` has moved and its `KeepClear` walls see where the boat went.
+
+**A wall for something that isn't a physics body.** A collision shape only stops physics bodies, and the rowboat is moved by script. So the wall is a sum instead: if the boat's inside the circle, put it back on the edge and take away the part of its speed heading in, which leaves it free to slide along. `Geometry2D.get_closest_point_to_segment()` is the same kind of flat sum for "how near a line". *Ours:* `KeepClear` (`scripts/sea/keep_clear.gd`) round the island, the buoy and the chain's foot; `HomeWaters.chain_distance()`.
+
+**Attach points.** A `Marker3D` named for the job (`LanternHook`, `ChainEye`, `SmokeOut`) marks where another part joins a prop. The part is a child of the marker (or reads its position), so swapping a model or moving a joint is one edit and the rest follows. *Ours:* the lamp post's `LanternHook` holds the hanging lantern; the rowboat's `OarlockPort` and `OarlockStarboard` are where its oars pivot; the mooring's `ChainEye` is where the great chain starts. The list for each model is in `docs/meshy.md` (Model library).
+
+**`editor_description`.** A free-text note every node has, shown in the Inspector and saved in the scene, so a scene with no script can still say what it is. *Ours:* each home-waters prop's root names its Meshy model and its attach points.
+
+**Soft particles from a gradient.** A particle drawn as a plain `QuadMesh` is a hard square. A `GradientTexture2D` with `fill` set to Radial makes a soft dot from a gradient (white in the middle, clear at the edge), and as the quad's texture it makes each particle a puff. With *Billboard* set to Particle the quads always face the camera. *Ours:* the chimney smoke over each cottage in `home_waters.tscn`.
+
+## The painted dusk (sky, water and grade)
+
+**Sky shader (`shader_type sky;`).** A shader that paints the whole background from the view direction (`EYEDIR`) instead of from a mesh. Godot also uses what it paints for the scene's ambient light and reflections, so the sky tints everything. A sky shader can read the scene's first directional light (`LIGHT0_DIRECTION`, `LIGHT0_COLOR`). *Ours:* `shaders/painted_sky.gdshader`, held in `data/art/skies/home_dusk_sky.tres`.
+
+**Radiance (and `AT_CUBEMAP_PASS`).** The sky is also drawn into a small cube map called the radiance map, which is blurred for ambient light and reflections. The `Sky` resource's *Process Mode* says how often: Real-time every frame, Quality once, Incremental a little each frame. Clouds that drift slowly only need Incremental, with a small *Radiance Size*. Inside the shader, `AT_CUBEMAP_PASS` is true while it is drawing that cube map, so we skip the fine detail there. Only sky shaders have `RADIANCE`; a surface shader (the water) can't read it, so the water copies the sky's colours by hand. *Ours:* `data/art/environments/home_dusk.tres` (Sky > Process Mode, Radiance Size).
+
+**`group_uniforms`.** A line in a shader (`group_uniforms clouds;`) that files the uniforms after it under a heading in the Inspector, so a material with dozens of dials stays readable. `group_uniforms;` on its own ends the group. *Ours:* the sky's `sun`, `sky_colors`, `cumulus`, `cumulus_light`, `cloud_paint`, `streaks` and `painted_finish` groups.
+
+**FBM and domain warping.** FBM (fractal Brownian motion) adds copies of one noise, each twice as fine and half as strong, which makes cloud-like, rocky shapes. Domain warping reads that noise at a position first pushed about by other noise, which swirls the shapes into brushed streaks instead of smoke. *Ours:* `fbm()` and `streak_field()` in the sky shader (the high streaks).
+
+**Raymarching.** Drawing something that has no surface (cloud, smoke) by walking along each pixel's view ray in steps and asking at each step "how thick is it here?", adding up what's met. More steps look smoother and cost more. *Ours:* `cumulus()` in the sky shader walks 18 steps through a slab of sky 1.4 to 3.4 km up, where the thickness comes from `cumulus_at()`.
+
+**3D noise texture (`NoiseTexture3D`, `sampler3D`).** A noise baked into a small cube of pixels (64 x 64 x 64 here), read in a shader with a 3D position. Seamless, so it repeats without seams. Cheaper than working noise out in the shader. Cellular (Worley) noise, inverted, makes round puffs. *Ours:* `cloud_shape` and `cloud_puffs` in `home_dusk_sky.tres`.
+
+**Beer's law, powder and phase.** How light dims through cloud: what gets through is `exp(-thickness)`, so a little cloud in the way dims it a little and a lot almost blacks it out. The sky shader takes a few steps from each cloud point towards the sun to measure that thickness, which is what lights the sun side and leaves the far side violet. The "powder" term darkens thin edges facing away from the sun, and a phase function (Henyey-Greenstein) makes clouds between you and the sun glow at their rims (the silver lining). *Ours:* the `cumulus_light` group.
+
+**Half-resolution sky pass (`use_half_res_pass`).** A sky shader can ask Godot to run it a second time at half the screen size first; inside, `AT_HALF_RES_PASS` is true for that run, and the full-size run reads its result as `HALF_RES_COLOR`. Costly parts (our clouds) go in the small run, a quarter of the pixels. *Ours:* the cumulus are drawn there and laid over the full-size gradient and sun.
+
+**Posterising.** Cutting a smooth brightness into a few steps (with a slightly soft edge) so shading reads as flat paint. *Ours:* `posterise()` in the sky shader gives the clouds their shadow, shade, lit and rim bands; the water's `reflection_bands` does the same to the mirrored sky on wave faces.
+
+**Anisotropic glitter.** "Anisotropic" means different in different directions. A low sun's path on the sea is long and narrow because a wave face only has to tilt the right way up and down (along the line to the sun) but almost exactly the right way sideways. The water shader's glint test is loose in one direction and tight in the other, so the glints line up into a column. *Ours:* `glitter` and `sun_path` in `shaders/water.gdshader`.
+
+**Colour correction ramp.** The Environment's *Adjustments > Color Correction* takes a 1D gradient that remaps each colour channel, after tone mapping. A ramp with a little blue in the darks and a little less blue in the lights makes violet shadows and amber highlights. *Ours:* the gradient in `home_dusk.tres`.
+
+**Local to scene.** An Environment saved as a `.tres` is shared by everything that loads it. Setting *Local to Scene* gives each scene its own copy, so home waters can change the fog without touching the file. *Ours:* `home_dusk.tres`.
 
 ## Testing
 

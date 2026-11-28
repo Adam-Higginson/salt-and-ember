@@ -82,3 +82,51 @@ Layers fitted by `tools/meshy/fit_layer.py` each sit 12 mm off the body, so wher
         start_legs.glb sea_feet.glb start_legs.glb legs
 
 The hero's own (`meshy/boy_stern/layers/`) were tucked this way: shirt into trousers, trousers into the sea boots. A layer refitted with `fit_layer.py` comes out untucked again, so tuck it again after.
+
+## Models wanted (home waters, #227)
+
+**Done in #234:** the cottage, the home cottage, the jetty, the lamp post, the mooring and the chain link, plus the rowboat's hull and oars and the hydrangea pots (see the Model library below). Only the buoy is still greybox. The table is what each prop was asked to be.
+
+The opening's first beat (`scenes/prototype/intro/home_waters.tscn`) was greybox. Every prop is its own scene under `scenes/props/home/`, so a Meshy model replaces a prop in one place and every instance picks it up. Sizes are rough, in metres. Concept images are in `docs/concept/opening/`.
+
+| Scene | Size (W x H x D) | What it is | Concept image |
+|---|---|---|---|
+| `cottage.tscn` | 6.8 x 9 x 5.6 (chimney included) | A stone-walled island cottage with a red roof, chimney, two glowing windows, a window light and a smoke plume. Five of them climb the hill. | `home-from-the-water.webp` |
+| `jetty_cottage.tscn` | 6.8 x 9 x 5.6 | Your home by the jetty: like the cottage but with one big lit window, a green door and a warmer light. Holds `SiblingVoice`, where your sibling's call comes from. | `jetty-start.webp`, `home-from-the-water.webp` |
+| `jetty.tscn` | 3 x 5 x 11 | A wooden jetty on piles, running out into the water; the boat is tied up at its end. | `jetty-start.webp` |
+| `lamp_post.tscn` | 0.6 x 3.1 x 1.0 | A wooden post with an arm and a hanging lit lantern (flickering light). Six along the path up from the jetty. | `jetty-start.webp` |
+| `mooring.tscn` | 12 x 9 x 12 | The stone mooring on the island's summit, with an iron post and a great ring where the chain was fixed. | `home-from-the-water.webp` |
+| `buoy.tscn` | 5 x 7 x 5 | The rusted marker buoy: a round float with eyes, a four-legged cage rising to a railed platform and a lantern with a cap. Floats on the swell. Its `Model` node holds the shapes; `FloatOnSea` and `Wall` stay. | `buoy-and-chain.webp`, `rowing-out.webp` |
+
+Not wanted as models: the island's land (hill, shelf, knoll and rocks) is terrain, left as plain shapes; the great chain is built by `HangingChain` from one link; the rowboat has its own scene (`scenes/prototype/intro/rowboat.tscn`).
+
+**Swapping one in:** open the prop's scene, replace its shapes with the model (via `ThirdPartyModel`, as for the props above), and keep the root's name and any logic nodes (`SiblingVoice`, `Wall`, `FloatOnSea`, the lights and smoke). `home_waters.gd` finds the buoy, the buoy's wall and `SiblingVoice` by their paths.
+
+## Model library (#234)
+
+Every model is one reusable part. Where another part attaches or moves, the prop scene has a named `Marker3D`, so a part can be swapped or combined without touching the others. Each model's folder, `assets/third_party/meshy/<name>/`, has a `meta.json` (the picture, the prompt, Meshy's task, settings, size, scale and rotation used in Godot, attach points, and which scenes use it) and `concept.png` (the picture it was made from). The pictures were drawn in ChatGPT, then each went into one image-to-3D task (smart topology, `meshy-t2.5`, `meshy-n1` texture at 2K), 15 credits each: 135 for the nine.
+
+Meshy always hands back a one-metre model, so each is scaled by `fit_size` (these aren't rigged, so that's safe) or by the node's scale, and turned to face our way.
+
+| Model | File (`assets/third_party/meshy/...`) | Scene | Size (m) | Attach points | Composes with | Credits |
+|---|---|---|---|---|---|---|
+| Rowboat hull | `rowboat_hull/model/model.glb` | `scenes/prototype/intro/rowboat.tscn` (`HullModel`) | 3.4 long, 1.3 wide | `BowPole/LanternHook` (the ring on the bow pole's arm), `OarlockPort`, `OarlockStarboard` | oar x2, `lantern_body` | 15 |
+| Oar | `oar/model/model.glb` | the same scene (`OarModel`, twice) | 2.8 long | its collar sits on the oarlock | rowboat hull | 15 |
+| Cottage | `cottage/model/model.glb` | `scenes/props/home/cottage.tscn` (x5) | 6.8 x 9 x 5.6 | `SmokeOut`, `WindowUpper`, `WindowLower`, `WindowLight` | hydrangea pots | 15 |
+| Home cottage | `jetty_cottage/model/model.glb` | `scenes/props/home/jetty_cottage.tscn` | 8.1 x 5.2 x 6.3 | `LanternHook` (door bracket), `SiblingVoice`, `BigWindow`, `WindowLight`, `SmokeOut` | hydrangea pots, `lantern.tscn` | 15 |
+| Hydrangea pots | `hydrangea_pots/model/model.glb` | `scenes/props/home/hydrangea_pots.tscn` | 1.2 x 1.07 x 0.9 | none | cottages (doors, steps) | 15 |
+| Jetty | `jetty/model/model.glb` | `scenes/props/home/jetty.tscn` | 11 x 5 x 3 | `TieUp` (the bollards at the sea end) | rowboat, lamp posts | 15 |
+| Lamp post | `lamp_post/model/model.glb` | `scenes/props/home/lamp_post.tscn` (x6) | 0.52 x 3.1 x 1.2 | `LanternHook` (the hook; `lantern.tscn` hangs from it) | `lantern.tscn` | 15 |
+| Mooring | `mooring/model/model.glb` | `scenes/props/home/mooring.tscn` | 12 x 8.6 x 12 | `ChainEye` (the eye on the post) | chain link | 15 |
+| Chain link | `chain_link/model/model.glb` | `HangingChain.link_model` (home waters' chain, the Grave's three) | scaled by `link_length` | none (the chain starts at the mooring's `ChainEye`) | mooring | 15 |
+
+Notes:
+
+- **Without the art**, each scene shows its greybox: the model nodes are `ThirdPartyModel`s whose `stand_ins` are the old shapes, and `HangingChain` keeps its torus links when `link_model`'s file isn't there. The attach-point markers are always there.
+- **The chain link** is not a scene: `HangingChain.link_model` takes a `.glb`, scales it so its length is `link_length` and turns each link a quarter turn from the last. The link lies the way Meshy made it (length along Y, width along X, thickness along Z). It brings its own rust paint, so `iron` and `thickness` only dress the torus.
+- **The lamp post** has no light of its own any more: the hanging `lantern.tscn` is its light (it flickers and swings).
+- **The mooring's eye** is about 1.5 m across, and the great chain's links (7 m long) are far bigger than it. Seen from the island it reads fine, but if it looks wrong up close, make the eye bigger or the chain's links smaller.
+- **The windows** have dark glass in every model; the glow is a see-through quad in the scene (`WindowUpper`, `WindowLower`, `BigWindow`) plus `WindowLight`.
+- **Footings:** the cottages stand on a hillside, so each keeps a dark stone `Foundation` box under the model, down into the hill, as the old greybox body did.
+- **Rowboat:** the greybox rower sits on the model's rowing thwart; the lantern hangs at the bow pole's ring, lower than the old greybox pole held it (the model's pole is shorter), and its `Voice` is 0.35 m above it.
+- **Still to make:** rope coil, boathook and oil can (loose gear), the buoy (float, lattice tower, railed platform) and its caged lamp.
