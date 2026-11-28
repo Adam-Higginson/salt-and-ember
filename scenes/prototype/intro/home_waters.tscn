@@ -18,6 +18,7 @@
 [ext_resource type="PackedScene" path="res://scenes/props/home/lamp_post.tscn" id="25_lamp_post"]
 [ext_resource type="Environment" path="res://data/art/environments/home_dusk.tres" id="26_env"]
 [ext_resource type="Script" path="res://scripts/art/painted_look.gd" id="27_painted"]
+[ext_resource type="Material" path="res://assets/placeholder/materials/water_dusk.tres" id="28_water"]
 
 [sub_resource type="StandardMaterial3D" id="Rock"]
 albedo_color = Color(0.4, 0.34, 0.4, 1)
@@ -83,6 +84,7 @@ shadow_enabled = true
 directional_shadow_max_distance = 250.0
 
 [node name="SeaSurface" parent="." instance=ExtResource("2_sea")]
+material_override = ExtResource("28_water")
 settings = ExtResource("3_swell")
 hull_half = Vector2(0, 0)
 bow_reach = 0.0

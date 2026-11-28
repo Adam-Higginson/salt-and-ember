@@ -86,6 +86,22 @@ In `golden_cabin.tres`, group **Glow**:
 - **HDR Threshold** (default 1.6): how bright something must be before it blooms. Raise it so only lanterns and the window glow; lower it and sunlit coats start to glow too.
 - **Bloom** (default 0.02): a haze over everything; keep it near 0 for a crisp picture.
 
+## The painted dusk (home waters, the opening)
+
+Home waters has its own sky, grade and sea; the rest of the game is untouched. Try it with F6 on `scenes/prototype/intro/home_waters.tscn`.
+
+| Part | File | Dials |
+|---|---|---|
+| The sky: gradient, sun, painted clouds | `shaders/painted_sky.gdshader`, set in `data/art/skies/home_dusk_sky.tres` | Groups in the Inspector: *Sun*, *Sky Colors*, *Clouds* (cover, scale, drift speed, warp), *Cloud Light* (band count, softness, the four light colours), *Painted Finish* (ragged edges, canvas weave). |
+| The grade, fog, glow | `data/art/environments/home_dusk.tres` | Tonemap (AgX), Adjustments (saturation and the colour ramp: violet darks, amber lights), Fog (colour, aerial perspective), Glow (threshold 1.5, so only lamps and the sun bloom). |
+| The sea | `assets/placeholder/materials/water_dusk.tres` (the shared shader is `shaders/water.gdshader`) | `reflect_sky`, `fresnel_power`, `glitter` (+ width, colour), `far_blend` (+ colour, start, end), `foam_crisp`, and the sky colours/sun direction it mirrors (keep them in step with the sky). |
+| Painted picture | the `PaintedLook` node, `keep_scene_grade` on | `haze_color` (violet), `haze_strength`. With `keep_scene_grade` it leaves tone mapping, saturation and glow to the Environment, so the scene is graded once. |
+| Lamp halos | `Halo` in `scenes/props/home/lamp_post.tscn`, material `assets/placeholder/materials/lamp_halo.tres` | The material's colour alpha (strength) and the quad's size. |
+
+The sun's direction is read from the `Sun` node by the sky, but the water can't read it: if you turn the `Sun`, change *Sky Sun Direction* in `water_dusk.tres` to match. The night materials (`water.tres`) leave every dusk dial at 0, so the Grave and the ship's sea look as before.
+
+Cost: the sky is drawn only where the sky shows, about 15 texture reads a pixel; the cube map for ambient light is Incremental at 128 px so drifting clouds cost almost nothing there. Measure with the Performance monitors before adding layers.
+
 ## What's not stylised
 
 Only characters get the cel shader and outline. Rooms and props keep their own materials (and so their texture detail), and are drawn into the same palette by the light: the warm sun, the ambient colour, and the tone mapping.

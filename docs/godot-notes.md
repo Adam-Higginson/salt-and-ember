@@ -784,6 +784,22 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 
 **Soft particles from a gradient.** A particle drawn as a plain `QuadMesh` is a hard square. A `GradientTexture2D` with `fill` set to Radial makes a soft dot from a gradient (white in the middle, clear at the edge), and as the quad's texture it makes each particle a puff. With *Billboard* set to Particle the quads always face the camera. *Ours:* the chimney smoke over each cottage in `home_waters.tscn`.
 
+## The painted dusk (sky, water and grade)
+
+**Sky shader (`shader_type sky;`).** A shader that paints the whole background from the view direction (`EYEDIR`) instead of from a mesh. Godot also uses what it paints for the scene's ambient light and reflections, so the sky tints everything. A sky shader can read the scene's first directional light (`LIGHT0_DIRECTION`, `LIGHT0_COLOR`). *Ours:* `shaders/painted_sky.gdshader`, held in `data/art/skies/home_dusk_sky.tres`.
+
+**Radiance (and `AT_CUBEMAP_PASS`).** The sky is also drawn into a small cube map called the radiance map, which is blurred for ambient light and reflections. The `Sky` resource's *Process Mode* says how often: Real-time every frame, Quality once, Incremental a little each frame. Clouds that drift slowly only need Incremental, with a small *Radiance Size*. Inside the shader, `AT_CUBEMAP_PASS` is true while it is drawing that cube map, so we skip the fine detail there. Only sky shaders have `RADIANCE`; a surface shader (the water) can't read it, so the water copies the sky's colours by hand. *Ours:* `data/art/environments/home_dusk.tres` (Sky > Process Mode, Radiance Size).
+
+**`group_uniforms`.** A line in a shader (`group_uniforms clouds;`) that files the uniforms after it under a heading in the Inspector, so a material with dozens of dials stays readable. `group_uniforms;` on its own ends the group. *Ours:* the sky's `sun`, `sky_colors`, `clouds`, `cloud_light` and `painted_finish` groups.
+
+**FBM and domain warping.** FBM (fractal Brownian motion) adds copies of one noise, each twice as fine and half as strong, which makes cloud-like, rocky shapes. Domain warping reads that noise at a position first pushed about by other noise, which swirls the shapes into brushed streaks instead of smoke. *Ours:* `fbm()` and `cloud_field()` in the sky shader.
+
+**Posterising.** Cutting a smooth brightness into a few steps (with a slightly soft edge) so shading reads as flat paint. *Ours:* `posterise()` in the sky shader gives the clouds their shadow, shade, lit and rim bands.
+
+**Colour correction ramp.** The Environment's *Adjustments > Color Correction* takes a 1D gradient that remaps each colour channel, after tone mapping. A ramp with a little blue in the darks and a little less blue in the lights makes violet shadows and amber highlights. *Ours:* the gradient in `home_dusk.tres`.
+
+**Local to scene.** An Environment saved as a `.tres` is shared by everything that loads it. Setting *Local to Scene* gives each scene its own copy, so home waters can change the fog without touching the file. *Ours:* `home_dusk.tres`.
+
 ## Testing
 
 **gdUnit4.** The test framework (`addons/gdUnit4`). Suites extend our `GameTestSuite` and have `test_...` functions. `scene_runner` loads a scene and lets a test press inputs and wait physics ticks. *Ours:* `tests/`.

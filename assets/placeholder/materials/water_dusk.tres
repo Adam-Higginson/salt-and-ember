@@ -1,0 +1,70 @@
+[gd_resource type="ShaderMaterial" format=4 uid="uid://bpd8usk4wtr0q"]
+
+[ext_resource type="Shader" uid="uid://dhsx7hgqd23rd" path="res://shaders/water.gdshader" id="1_2f1w5"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_fx4jl"]
+seed = 1
+frequency = 0.03
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_jfevy"]
+width = 256
+height = 256
+noise = SubResource("FastNoiseLite_fx4jl")
+seamless = true
+as_normal_map = true
+bump_strength = 4.0
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_fjp70"]
+seed = 2
+frequency = 0.05
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_hsf1a"]
+width = 256
+height = 256
+noise = SubResource("FastNoiseLite_fjp70")
+seamless = true
+as_normal_map = true
+bump_strength = 4.0
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_w24vu"]
+seed = 3
+frequency = 0.04
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ftbjq"]
+width = 256
+height = 256
+noise = SubResource("FastNoiseLite_w24vu")
+seamless = true
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_2f1w5")
+shader_parameter/wave_count = 0
+shader_parameter/wave_a = PackedVector4Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+shader_parameter/wave_b = PackedVector4Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+shader_parameter/wave_time = 0.0
+shader_parameter/hull_inverse = Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+shader_parameter/hull_half = Vector2(6, 15)
+shader_parameter/wake = 0.0
+shader_parameter/rain = 0.0
+shader_parameter/deep_color = Color(0.07, 0.06, 0.2, 1)
+shader_parameter/crest_color = Color(0.3, 0.2, 0.48, 1)
+shader_parameter/foam_color = Color(0.98, 0.8, 0.78, 1)
+shader_parameter/roughness_water = 0.04
+shader_parameter/detail_a = SubResource("NoiseTexture2D_jfevy")
+shader_parameter/detail_b = SubResource("NoiseTexture2D_hsf1a")
+shader_parameter/detail_scale = 0.06
+shader_parameter/detail_strength = 0.5
+shader_parameter/foam_noise = SubResource("NoiseTexture2D_ftbjq")
+shader_parameter/crest_foam_from = 0.45
+shader_parameter/hull_foam_width = 1.4
+shader_parameter/night_glow = 0.2
+shader_parameter/sky_reflection = Color(0.2, 0.24, 0.28, 1)
+shader_parameter/reflect_sky = 1.0
+shader_parameter/fresnel_power = 5.0
+shader_parameter/glitter = 4.0
+shader_parameter/far_blend = 0.85
+shader_parameter/foam_crisp = 0.9
