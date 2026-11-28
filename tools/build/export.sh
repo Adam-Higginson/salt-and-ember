@@ -74,10 +74,25 @@ cp -r builds/extras/. builds/windows/
 echo "== Starting the exported game"
 scratch="$(pwd)/builds/smoke_user"
 mkdir -p "$scratch"
-# From inside the build, so it can't find the project's own files instead.
-(cd builds/windows && APPDATA="$scratch" XDG_DATA_HOME="$scratch" "$GODOT" --headless \
+# It runs in its own folder, not in builds/windows: a GDExtension's library is
+# found beside the pck, and the Windows build only carries the Windows one, so
+# a Linux Godot (CI) would find none. The smoke folder gets every plugin's bin/
+# (from addons/, for all platforms) at the same path, so any host's Godot can
+# load them. The zips are not touched.
+smoke="$(pwd)/builds/smoke_run"
+rm -rf "$smoke"
+mkdir -p "$smoke"
+cp builds/windows/SaltAndEmber.pck "$smoke/"
+while IFS= read -r extension; do
+	plugin="$(dirname "$extension")"
+	if [ -d "$plugin/bin" ]; then
+		mkdir -p "$smoke/$plugin"
+		cp -r "$plugin/bin" "$smoke/$plugin/"
+	fi
+done < <(find addons -name "*.gdextension")
+(cd "$smoke" && APPDATA="$scratch" XDG_DATA_HOME="$scratch" "$GODOT" --headless \
 	--main-pack SaltAndEmber.pck --quit-after 600 > ../smoke.log 2>&1) || true
-rm -rf "$scratch"
+rm -rf "$scratch" "$smoke"
 # "Resources still in use at exit" is printed by every run of the game, from
 # the editor too, as it quits: not a fault in the build.
 if grep -E "ERROR|Parse Error" builds/smoke.log | grep -v "resources still in use at exit"; then
