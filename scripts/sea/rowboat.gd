@@ -9,6 +9,12 @@ extends Node3D
 ## boat sits on them, pitching and rolling with the swell (never more than
 ## [member max_tilt_degrees]).
 ##
+## Its looks are Meshy models (#234, docs/meshy.md): the hull and two oars,
+## over greybox stand-ins. Attach points: [code]BowPole/LanternHook[/code]
+## (where the lantern hangs), and [code]OarlockPort[/code] and
+## [code]OarlockStarboard[/code] (where the oars pivot; [code]OarPort[/code] and
+## [code]OarStarboard[/code] are placed on them).
+##
 ## A [SeaCurrent] can take it over. As the current's [code]takeover[/code]
 ## rises, the water carries the boat along and your strokes and turns count
 ## for less; at full takeover the oars still move but do nothing.
