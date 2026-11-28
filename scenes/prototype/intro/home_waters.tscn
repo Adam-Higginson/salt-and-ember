@@ -17,6 +17,9 @@
 [ext_resource type="PackedScene" path="res://scenes/props/home/buoy.tscn" id="23_buoy"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/cottage.tscn" id="24_cottage"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/lamp_post.tscn" id="25_lamp_post"]
+[ext_resource type="Script" path="res://scripts/intro/buoy_tending.gd" id="36_tending"]
+[ext_resource type="Script" path="res://scripts/intro/bow_lantern.gd" id="37_bow_lantern"]
+[ext_resource type="PackedScene" path="res://scenes/props/home/chain_hand.tscn" id="38_chain_hand"]
 [ext_resource type="Environment" path="res://data/art/environments/home_dusk.tres" id="26_env"]
 [ext_resource type="Script" path="res://scripts/art/painted_look.gd" id="27_painted"]
 [ext_resource type="Material" path="res://assets/placeholder/materials/water_dusk.tres" id="28_water"]
@@ -61,7 +64,18 @@ height = 6.0
 radial_segments = 10
 rings = 5
 
-[node name="HomeWaters" type="Node3D" node_paths=PackedStringArray("boat", "sea", "buoy", "chain", "lantern", "sibling", "home_centre", "walls", "world", "ending")]
+[sub_resource type="StandardMaterial3D" id="SparkMaterial"]
+shading_mode = 0
+albedo_color = Color(1, 0.8, 0.45, 1)
+
+[sub_resource type="SphereMesh" id="SparkMesh"]
+material = SubResource("SparkMaterial")
+radius = 0.06
+height = 0.12
+radial_segments = 8
+rings = 4
+
+[node name="HomeWaters" type="Node3D" node_paths=PackedStringArray("boat", "sea", "buoy", "chain", "lantern", "sibling", "home_centre", "walls", "world", "tending", "ending")]
 script = ExtResource("1_beat")
 boat = NodePath("Rowboat")
 sea = NodePath("SeaSurface")
@@ -72,6 +86,7 @@ sibling = NodePath("Island/JettyCottage/SiblingVoice")
 home_centre = NodePath("HomeCentre")
 walls = [NodePath("Island/Wall"), NodePath("Buoy/Wall"), NodePath("ChainFoot")]
 world = NodePath("WorldEnvironment")
+tending = NodePath("BuoyTending")
 ending = NodePath("Screen/Ending")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -97,6 +112,12 @@ position = Vector3(28, 0, 29)
 position = Vector3(0, 0.35, 0)
 script = ExtResource("8_speaker")
 who = &"lantern"
+
+[node name="BowLantern" type="Node3D" parent="Rowboat/BowPole" node_paths=PackedStringArray("face", "light", "voice")]
+script = ExtResource("37_bow_lantern")
+face = NodePath("../Lantern")
+light = NodePath("../Light")
+voice = NodePath("../Voice")
 
 [node name="Camera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2.9, 35.5)
@@ -231,6 +252,37 @@ radius = 5.5
 [node name="Buoy" parent="." instance=ExtResource("23_buoy")]
 position = Vector3(-10, 0, -120)
 
+[node name="ChainHand" parent="Buoy" instance=ExtResource("38_chain_hand")]
+position = Vector3(-1.45, 5.3, 0)
+
+[node name="Spark" type="MeshInstance3D" parent="."]
+visible = false
+mesh = SubResource("SparkMesh")
+
+[node name="Glow" type="OmniLight3D" parent="Spark"]
+light_color = Color(1, 0.75, 0.4, 1)
+light_energy = 1.5
+omni_range = 4.0
+
+[node name="BuoyTending" type="Node" parent="." node_paths=PackedStringArray("boat", "rower", "camera", "lantern", "buoy", "tie_point", "climb_top", "stand_spot", "lantern_perch", "lantern_spot", "spots", "chain_hand", "lamp", "spark", "prompt", "reticle")]
+script = ExtResource("36_tending")
+boat = NodePath("../Rowboat")
+rower = NodePath("../Rowboat/Rower")
+camera = NodePath("../Camera")
+lantern = NodePath("../Rowboat/BowPole/BowLantern")
+buoy = NodePath("../Buoy")
+tie_point = NodePath("../Buoy/TieUp")
+climb_top = NodePath("../Buoy/ClimbTop")
+stand_spot = NodePath("../Buoy/StandSpot")
+lantern_perch = NodePath("../Buoy/LanternPerch")
+lantern_spot = NodePath("../Buoy/LanternSpot")
+spots = [NodePath("../Buoy/ChainSpot"), NodePath("../Buoy/LampSpot"), NodePath("../Buoy/LadderSpot")]
+chain_hand = NodePath("../Buoy/ChainHand")
+lamp = NodePath("../Buoy/Lamp")
+spark = NodePath("../Spark")
+prompt = NodePath("../Screen/Prompt")
+reticle = NodePath("../Screen/Reticle")
+
 [node name="Screen" type="CanvasLayer" parent="."]
 
 [node name="Help" type="Label" parent="Screen"]
@@ -239,7 +291,7 @@ offset_top = 12.0
 offset_right = 900.0
 offset_bottom = 60.0
 theme_override_font_sizes/font_size = 11
-text = "Row: stick or WASD. Look: mouse (click; Esc frees it) or right stick."
+text = "Row: stick or WASD. Look: mouse (click; Esc frees it) or right stick. Interact: E, Space or the south button."
 
 [node name="Ending" type="Label" parent="Screen"]
 anchors_preset = 15
@@ -249,6 +301,42 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 40
 text = "To be continued..."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Prompt" type="Label" parent="Screen"]
+visible = false
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -110.0
+offset_right = 300.0
+offset_bottom = -70.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 22
+text = "[E]  Tie up"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Reticle" type="Label" parent="Screen"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -10.0
+offset_top = -14.0
+offset_right = 10.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 14
+text = "+"
 horizontal_alignment = 1
 vertical_alignment = 1
 

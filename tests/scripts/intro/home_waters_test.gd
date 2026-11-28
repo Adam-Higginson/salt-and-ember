@@ -93,8 +93,35 @@ func test_reached_buoy_fires_once_and_only_alongside() -> void:
 
 	assert_array(arrivals).is_equal([true])
 	assert_bool(_beat.at_buoy).is_true()
-	assert_bool(_beat.ending.visible).is_true()
+	# Tending the buoy takes over (#228): "To be continued" waits until it's done.
+	assert_bool(_beat.ending.visible).is_false()
+	assert_int(_beat.tending.phase).is_equal(BuoyTending.Phase.ALONGSIDE)
 	assert_bool(_beat.boat.controls_enabled).is_false()
+
+
+func test_coming_alongside_drops_the_rowing_chatter_still_waiting() -> void:
+	# Your sibling is still speaking, so the rowing-out moments pile up.
+	_place(BESIDE_THE_CHAIN)
+	await physics_ticks(_runner, 10)
+	assert_array(_beat.waiting).contains([&"left_jetty", &"by_chain"])
+	_beat.lantern.say("An old line.")
+	_beat.lantern.say("Another old line.")
+
+	_place(ALONGSIDE)
+	await physics_ticks(_runner, 3)
+
+	assert_bool(_beat.at_buoy).is_true()
+	assert_array(_beat.waiting).not_contains([&"left_jetty", &"by_chain"])
+	_beat.sibling.hush()
+	var said: Array[String] = []
+	_beat.lantern.said.connect(func(line: String) -> void: said.append(line))
+	await physics_ticks(_runner, 900)
+
+	# The line showing finished; the one waiting behind it was forgotten, and
+	# so were the moments that were waiting their turn.
+	assert_array(said).not_contains(["Another old line."])
+	assert_array(_beat.played).not_contains([&"left_jetty", &"by_chain"])
+	assert_array(_beat.played).contains([&"at_buoy"])
 
 
 func test_the_island_wall_stops_the_boat() -> void:
@@ -120,7 +147,7 @@ func test_the_wall_round_the_buoy_stops_the_boat() -> void:
 	await walk(_runner, "move_up", 300)
 
 	var boat: Vector3 = _beat.boat.global_position
-	assert_float(Vector2(boat.x, boat.z).distance_to(Vector2(-10, -120))).is_greater_equal(4.19)
+	assert_float(Vector2(boat.x, boat.z).distance_to(Vector2(-10, -120))).is_greater_equal(4.59)
 
 
 func test_far_out_the_fog_closes_in_and_the_lantern_nudges_you_back() -> void:
