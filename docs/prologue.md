@@ -95,7 +95,11 @@ They're dead lanterns, his own kind. Nobody ever told him where lanterns go.
 
 The ringing, the pull, the capsize: the Grave pulls him off the pole, you reach for him and go in after him.
 
-Then the rescue as built (Scene 1 below, `underwater.tscn`), with his lines rewritten for a friend rather than a stranger. This replaces Scene 0's rail talk. *(Lines to be written.)*
+Then the rescue as built (Scene 1 below, `underwater.tscn`), with his lines rewritten for a friend rather than a stranger. This replaces Scene 0's rail talk. *(Built as a greybox in #230, `data/dialogue/into_the_grave.dlg`; first drafts.)*
+
+**Built, as drafted:** drifting over the lights, he says "There you are...", then "Look! Lights, all the way down." and "I knew there'd be somewhere. I knew it." The view cuts down to the dead lanterns: "Wait..." / "These are... they're lanterns." / "Like me. They're all..." Back on the boat: "...Oh." and, at the ringing, "That sound. Do you hear it?" The Grave pulls him off the pole; the only choice is "Reach for him" (no timer), and the boat tips and you go in after him.
+
+**In the water (the friend's version of Scene 1):** "You came in after me?" / "You can't swim in this. Nobody can." / "Oh, don't go quiet on me. Not you." He can't lift you ("Come on. Come on!"): "Hold on. I've still got something." / "Here. Take my hand." On the touch: "Oh..." / "The lanterns down there..." / "they've been calling my light since the pole." / "I can't..." / "I can't hold on to it." Then, in place of "I don't know who you are...": "You came in after me." / "So I'm not letting go of you, either." The white. The scene ends there; the ship finds you next (#231).
 
 ### Scene U5: The ship finds you (#231)
 
@@ -234,7 +238,7 @@ The lantern is already gone, off his hook and over the side.
 
 ---
 
-## Scene 1: The rescue (#183, built; lines to be rewritten, #230)
+## Scene 1: The rescue (#183, built; the friend's lines are written in #230, below under Scene U4; this is the stranger's version the old opening still plays)
 
 *The pictures stay (the descent, the dead lanterns, his hand, the light going into you, the white). The words change: in the Unmooring he is your friend, not a stranger, so "I don't know who you are..." goes, and the rest is rewritten for a friend (#230).*
 
