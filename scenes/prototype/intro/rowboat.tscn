@@ -7,6 +7,9 @@
 [ext_resource type="PackedScene" path="res://scenes/prototype/lantern_body.tscn" id="5_lantern"]
 [ext_resource type="Script" path="res://scripts/props/flicker.gd" id="6_flicker"]
 [ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="7_meshy"]
+[ext_resource type="PackedScene" path="res://scenes/props/home/rope_coil.tscn" id="8_coil"]
+[ext_resource type="PackedScene" path="res://scenes/props/home/oil_can.tscn" id="9_can"]
+[ext_resource type="PackedScene" path="res://scenes/props/home/boathook.tscn" id="10_hook"]
 
 [sub_resource type="BoxMesh" id="Bottom"]
 size = Vector3(1.1, 0.1, 2.9)
@@ -194,3 +197,15 @@ omni_range = 10.0
 script = ExtResource("6_flicker")
 base_energy = 1.6
 amount = 0.15
+
+[node name="Gear" type="Node3D" parent="."]
+editor_description = "Loose gear (Meshy props, docs/meshy.md): the rope coil and oil can lie in the bow on the floor, the boathook along the starboard side. Clear of the rower's seat and the oars."
+
+[node name="RopeCoil" parent="Gear" instance=ExtResource("8_coil")]
+transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, -0.08, -0.1, -0.64)
+
+[node name="OilCan" parent="Gear" instance=ExtResource("9_can")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.34, -0.1, -0.62)
+
+[node name="Boathook" parent="Gear" instance=ExtResource("10_hook")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0.45, 0.08, 0.5)
