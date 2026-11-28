@@ -78,8 +78,8 @@ environment = ExtResource("26_env")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 rotation = Vector3(-0.055, -2.763, 0)
-light_color = Color(1, 0.56, 0.32, 1)
-light_energy = 0.9
+light_color = Color(1, 0.78, 0.52, 1)
+light_energy = 1.1
 shadow_enabled = true
 directional_shadow_max_distance = 250.0
 
@@ -250,5 +250,5 @@ vertical_alignment = 1
 [node name="PaintedLook" type="Node" parent="."]
 script = ExtResource("27_painted")
 keep_scene_grade = true
-haze_color = Color(0.62, 0.46, 0.78, 1)
-haze_strength = 0.4
+haze_color = Color(0.59, 0.58, 0.7, 1)
+haze_strength = 0.25

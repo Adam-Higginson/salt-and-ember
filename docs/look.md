@@ -93,12 +93,14 @@ Home waters has its own sky, grade and sea; the rest of the game is untouched. T
 | Part | File | Dials |
 |---|---|---|
 | The sky: gradient, sun, painted clouds | `shaders/painted_sky.gdshader`, set in `data/art/skies/home_dusk_sky.tres` | Groups in the Inspector: *Sun*, *Sky Colors*, *Clouds* (cover, scale, drift speed, warp), *Cloud Light* (band count, softness, the four light colours), *Painted Finish* (ragged edges, canvas weave). |
-| The grade, fog, glow | `data/art/environments/home_dusk.tres` | Tonemap (AgX), Adjustments (saturation and the colour ramp: violet darks, amber lights), Fog (colour, aerial perspective), Glow (threshold 1.5, so only lamps and the sun bloom). |
+| The grade, fog, glow | `data/art/environments/home_dusk.tres` | Ambient (mostly a cool blue-violet; the warm light comes only from the `Sun`), Tonemap (AgX), Adjustments (saturation 0.95 and the colour ramp), Fog (cool lavender), Glow (threshold 1.8: a soft golden halo, not a white blowout). |
 | The sea | `assets/placeholder/materials/water_dusk.tres` (the shared shader is `shaders/water.gdshader`) | `reflect_sky`, `fresnel_power`, `glitter` (+ width, colour), `far_blend` (+ colour, start, end), `foam_crisp`, and the sky colours/sun direction it mirrors (keep them in step with the sky). |
 | Painted picture | the `PaintedLook` node, `keep_scene_grade` on | `haze_color` (violet), `haze_strength`. With `keep_scene_grade` it leaves tone mapping, saturation and glow to the Environment, so the scene is graded once. |
 | Lamp halos | `Halo` in `scenes/props/home/lamp_post.tscn`, material `assets/placeholder/materials/lamp_halo.tres` | The material's colour alpha (strength) and the quad's size. |
 
 The sun's direction is read from the `Sun` node by the sky, but the water can't read it: if you turn the `Sun`, change *Sky Sun Direction* in `water_dusk.tres` to match. The night materials (`water.tres`) leave every dusk dial at 0, so the Grave and the ship's sea look as before.
+
+The palette (from an art-direction critique, #247): a mostly cool world with warm focal points. Upper sky #49466F, clouds #9B829F with sunlit edges #E8A18A, horizon #F2BE92, ocean base #35465D, water reflections #686580, fog #9693B2, sun and lamps #FFD08A. Warm peach and amber come only from the sun, sunlit cloud edges and lamps; ambient light is cool, and materials keep their natural colours. Sea glitter is concentrated along the sun's path.
 
 Cost: the sky is drawn only where the sky shows, about 15 texture reads a pixel; the cube map for ambient light is Incremental at 128 px so drifting clouds cost almost nothing there. Measure with the Performance monitors before adding layers.
 
