@@ -116,6 +116,9 @@ var beat: Beat = Beat.WAITING
 
 var _lights_tween: Tween = null
 var _tween: Tween = null
+# What the sunk lantern hangs from once the boat starts to go over: it follows
+# the boat along but never rolls with it.
+var _sunk_hook: Node3D = null
 
 
 func _ready() -> void:
@@ -134,6 +137,8 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	RowingGreybox.centre_sea_under(sea, boat)
+	if _sunk_hook != null:
+		_sunk_hook.global_position = boat.global_position
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -215,7 +220,11 @@ func _pull() -> void:
 			start.y + flung_to.y - sink_depth, pull_seconds - fling_seconds)
 	sinking.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	if lantern_light != null:
-		pulled.parallel().tween_property(lantern_light, "light_energy", 0.3,
+		# A Flicker rewrites light_energy every frame from its base, so it's the
+		# base that has to dim.
+		var dimmed: StringName = &"base_energy" if lantern_light is Flicker \
+				else &"light_energy"
+		pulled.parallel().tween_property(lantern_light, NodePath(dimmed), 0.3,
 				pull_seconds - fling_seconds)
 	await pulled.finished
 	if beat != Beat.PULL:
@@ -228,6 +237,7 @@ func _pull() -> void:
 
 # The boat tips and you're in the water; then black.
 func _capsize() -> void:
+	_hang_lantern_clear_of_boat()
 	var tipping: Tween = _new_tween()
 	tipping.tween_property(boat, "capsize_roll", deg_to_rad(capsize_degrees), capsize_seconds) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
@@ -237,6 +247,18 @@ func _capsize() -> void:
 	if fade != null:
 		await fade.fade_out(fade_seconds)
 	_start_rescue()
+
+
+# The lantern is under the bow pole, so rolling the boat would swing him up out
+# of the water. Hang him from a hook that follows the boat but doesn't turn.
+func _hang_lantern_clear_of_boat() -> void:
+	if _sunk_hook != null:
+		return
+	_sunk_hook = Node3D.new()
+	_sunk_hook.name = "SunkHook"
+	add_child(_sunk_hook)
+	_sunk_hook.global_position = boat.global_position
+	lantern.reparent(_sunk_hook, true)
 
 
 func _start_rescue() -> void:
@@ -250,6 +272,10 @@ func _finish() -> void:
 	if beat == Beat.DONE:
 		return
 	beat = Beat.DONE
+	# The talk's end has just begun fading the screen in (FadeCues): end on the
+	# rescue's white instead, so the drifting boat isn't shown behind the words.
+	if fade != null:
+		fade.cover_white_now()
 	if ending != null:
 		ending.visible = true
 	finished.emit()

@@ -178,6 +178,54 @@ func test_the_end_signal_fires_once_when_the_rescue_is_over() -> void:
 	assert_bool(_underwater().is_open).is_false()
 
 
+func test_the_sunk_lantern_stays_under_the_water_when_the_boat_rolls() -> void:
+	_start()
+	_hurry()
+	await _reach_for_him()
+	var before: Transform3D = _beat.lantern.global_transform
+	var boat_before: Vector3 = _beat.boat.global_position
+
+	_beat.reach()
+	await physics_ticks(_runner, 30)
+
+	assert_float(_beat.boat.capsize_roll).is_greater(1.0)
+	assert_bool(_beat.lantern.is_ancestor_of(_beat.lantern_light)).is_true()
+	assert_bool(_beat.boat.is_ancestor_of(_beat.lantern)).is_false()
+	# He stays as deep and as upright as he was, carried along with the boat.
+	var after: Transform3D = _beat.lantern.global_transform
+	var carried: Vector3 = _beat.boat.global_position - boat_before
+	assert_vector(after.origin - before.origin).is_equal_approx(carried, Vector3.ONE * 0.01)
+	assert_vector(after.basis.y).is_equal_approx(before.basis.y, Vector3.ONE * 0.01)
+
+
+func test_the_sinking_light_stays_dimmed_while_it_flickers() -> void:
+	_start()
+	_hurry()
+	await _reach_for_him()
+	await physics_ticks(_runner, 20)
+
+	var flicker: Flicker = _beat.lantern_light as Flicker
+	assert_object(flicker).is_not_null()
+	assert_float(flicker.base_energy).is_equal_approx(0.3, 0.001)
+	assert_float(flicker.light_energy).is_less(0.3 * (1.0 + flicker.amount) + 0.01)
+
+
+func test_it_ends_on_the_white_not_the_world_behind() -> void:
+	_start()
+	_hurry()
+	await _reach_for_him()
+	_beat.reach()
+	await physics_ticks(_runner, 60)
+	await _beat.fade.fade_to_white(0.05)
+
+	_beat.conversation.skip()
+	await physics_ticks(_runner, 90)
+
+	assert_int(_beat.beat).is_equal(IntoTheGrave.Beat.DONE)
+	assert_bool(_beat.fade.is_white()).is_true()
+	assert_bool(_beat.ending.visible).is_true()
+
+
 func test_every_section_it_plays_is_in_the_script() -> void:
 	var tree: DialogueTree = DialogueLibrary.find(IntoTheGrave.LINES)
 
