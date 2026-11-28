@@ -12,6 +12,7 @@
 [ext_resource type="Material" path="res://assets/placeholder/materials/greybox_grass.tres" id="14_grass"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/mooring.tscn" id="20_mooring"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/jetty_cottage.tscn" id="21_jetty_cottage"]
+[ext_resource type="PackedScene" path="res://scenes/props/home/hydrangea_pots.tscn" id="40_pots"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/jetty.tscn" id="22_jetty"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/buoy.tscn" id="23_buoy"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/cottage.tscn" id="24_cottage"]
@@ -93,7 +94,7 @@ bow_reach = 0.0
 position = Vector3(28, 0, 29)
 
 [node name="Voice" type="Marker3D" parent="Rowboat/BowPole"]
-position = Vector3(0, 1.85, -0.4)
+position = Vector3(0, 0.35, 0)
 script = ExtResource("8_speaker")
 who = &"lantern"
 
@@ -161,6 +162,9 @@ position = Vector3(0, 34, 70)
 [node name="JettyCottage" parent="Island" instance=ExtResource("21_jetty_cottage")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 29, 1.6, 45)
 
+[node name="HydrangeaPots" parent="Island/JettyCottage" instance=ExtResource("40_pots")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9, 0, 3.7)
+
 [node name="Cottage2" parent="Island" instance=ExtResource("24_cottage")]
 transform = Transform3D(-0.8638, 0, 0.5039, 0, 1, 0, -0.5039, 0, -0.8638, 14, 8.5438, 46)
 
@@ -211,12 +215,13 @@ fade_after = 14.0
 
 [node name="Chain" type="MultiMeshInstance3D" parent="."]
 script = ExtResource("7_chain")
-top = Vector3(0, 40, 66.5)
+top = Vector3(-1.6, 42, 70)
 bottom = Vector3(-20, -5, -114)
 sag = 4.0
 link_length = 7.0
 thickness = 1.3
 iron = SubResource("ChainRust")
+link_model = "res://assets/third_party/meshy/chain_link/model/model.glb"
 
 [node name="ChainFoot" type="Marker3D" parent="."]
 position = Vector3(-19, 0, -113)
