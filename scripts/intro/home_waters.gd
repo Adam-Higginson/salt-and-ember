@@ -4,7 +4,10 @@ extends Node3D
 ## the jetty with the island behind you; your older sibling calls once from
 ## the lit window by the jetty, and you row out to the marker buoy while the
 ## lantern on the bow pole chatters. Coming alongside the buoy ends the beat
-## ([signal reached_buoy]), which hands over to tending the buoy (#228).
+## ([signal reached_buoy]) and hands over to [BuoyTending] (#228): tie up,
+## climb on, feel the chain's hum, light the lamp, climb back down. When
+## that's done, [signal buoy_tended] is emitted and "To be continued" shows
+## until the chain breaks (#229).
 ##
 ## What the lantern says is in data/dialogue/home_waters.dlg, one section per
 ## moment. Some moments come with how far you've rowed (a fifth of the way,
@@ -21,6 +24,10 @@ extends Node3D
 
 ## Emitted once, when the boat first comes alongside the buoy.
 signal reached_buoy
+## Emitted once, when the buoy has been tended and you're back in the boat
+## (see [signal BuoyTending.tended]): the next beat, the chain breaking (#229),
+## starts here.
+signal buoy_tended
 ## Emitted when a moment's lines begin: [param moment] is its name in the
 ## dialogue file, or [constant SIBLING] for your sibling's call.
 signal cue_played(moment: StringName)
@@ -60,7 +67,9 @@ const TOO_FAR: StringName = &"too_far"
 @export var walls: Array[KeepClear] = []
 ## The scene's environment, whose fog thickens far out.
 @export var world: WorldEnvironment
-## Shown when you reach the buoy, until #228 carries on from there.
+## Tending the buoy, which takes over when you come alongside.
+@export var tending: BuoyTending
+## Shown when the buoy has been tended, until #229 carries on from there.
 @export var ending: Control
 
 @export_group("Landmarks")
@@ -112,6 +121,8 @@ func _ready() -> void:
 		_start = boat.global_position
 		if buoy != null:
 			_start_distance = maxf(_flat_distance(_start, buoy.global_position), 1.0)
+	if tending != null:
+		tending.tended.connect(_on_tended)
 	if sibling != null:
 		sibling.say(sibling_line)
 		played.append(SIBLING)
@@ -243,9 +254,17 @@ func _arrive() -> void:
 	# Let the boat glide to a stop alongside: #228 carries on from here.
 	boat.controls_enabled = false
 	cue(&"at_buoy")
-	if ending != null:
+	if tending != null:
+		tending.arrive()
+	elif ending != null:
 		ending.visible = true
 	reached_buoy.emit()
+
+
+func _on_tended() -> void:
+	if ending != null:
+		ending.visible = true
+	buoy_tended.emit()
 
 
 # Thickens the fog the further out you are, and has the lantern nudge you

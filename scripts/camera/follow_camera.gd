@@ -116,6 +116,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		look(-motion.x * mouse_sensitivity, -motion.y * mouse_sensitivity)
 
 
+## Eases the camera to [param metres] behind the target (within the zoom
+## limits), as the mouse wheel would.
+func zoom_to(metres: float) -> void:
+	_zoom_goal = clampf(metres, zoom_min, zoom_max)
+
+
 ## Turns the camera round the target by [param yaw_degrees] (positive turns
 ## the view left) and tilts it by [param pitch_degrees] (positive looks up),
 ## keeping the tilt within its limits. Any turn restarts the wait before the

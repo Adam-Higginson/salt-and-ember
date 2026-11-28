@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/intro/chain_hand.gd" id="1_hand"]
+[ext_resource type="Script" path="res://scripts/intro/hanging_chain.gd" id="2_chain"]
+[ext_resource type="Script" path="res://scripts/intro/chain_hum.gd" id="3_hum"]
+
+[sub_resource type="StandardMaterial3D" id="ChainIron"]
+albedo_color = Color(0.33, 0.17, 0.13, 1)
+metallic = 0.4
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="DripMaterial"]
+shading_mode = 0
+albedo_color = Color(0.7, 0.85, 1, 1)
+
+[sub_resource type="SphereMesh" id="Drip"]
+material = SubResource("DripMaterial")
+radius = 0.035
+height = 0.1
+radial_segments = 6
+rings = 3
+
+[node name="ChainHand" type="Node3D"]
+script = ExtResource("1_hand")
+
+[node name="Chain" type="MultiMeshInstance3D" parent="."]
+script = ExtResource("2_chain")
+bottom = Vector3(-0.3, -4.2, 0)
+sag = 0.15
+link_length = 0.45
+thickness = 0.09
+iron = SubResource("ChainIron")
+
+[node name="Hum" type="AudioStreamPlayer3D" parent="."]
+position = Vector3(-0.15, -1.5, 0)
+script = ExtResource("3_hum")
+
+[node name="Drips" type="CPUParticles3D" parent="."]
+position = Vector3(-0.15, -2.0, 0)
+emitting = false
+amount = 7
+lifetime = 1.1
+one_shot = true
+explosiveness = 0.15
+randomness = 0.6
+mesh = SubResource("Drip")
+emission_shape = 3
+emission_box_extents = Vector3(0.12, 1.9, 0.12)
+direction = Vector3(0, -1, 0)
+spread = 6.0
+gravity = Vector3(0, -9.8, 0)
+initial_velocity_max = 0.4

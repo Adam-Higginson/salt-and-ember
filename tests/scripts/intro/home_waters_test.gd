@@ -93,7 +93,9 @@ func test_reached_buoy_fires_once_and_only_alongside() -> void:
 
 	assert_array(arrivals).is_equal([true])
 	assert_bool(_beat.at_buoy).is_true()
-	assert_bool(_beat.ending.visible).is_true()
+	# Tending the buoy takes over (#228): "To be continued" waits until it's done.
+	assert_bool(_beat.ending.visible).is_false()
+	assert_int(_beat.tending.phase).is_equal(BuoyTending.Phase.ALONGSIDE)
 	assert_bool(_beat.boat.controls_enabled).is_false()
 
 

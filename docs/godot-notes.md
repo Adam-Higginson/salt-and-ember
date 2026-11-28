@@ -784,6 +784,22 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 
 **Soft particles from a gradient.** A particle drawn as a plain `QuadMesh` is a hard square. A `GradientTexture2D` with `fill` set to Radial makes a soft dot from a gradient (white in the middle, clear at the edge), and as the quad's texture it makes each particle a puff. With *Billboard* set to Particle the quads always face the camera. *Ours:* the chimney smoke over each cottage in `home_waters.tscn`.
 
+## Tending the buoy (#228)
+
+**A state machine as an enum.** When something goes through steps in order (alongside, tying up, climbing, on the buoy, climbing down, done), an `enum` of the steps and a variable holding the current one is the simplest way to keep track. A `match` on it in `_physics_process` runs the right code for the step you're in, and a setter on the variable can emit a signal whenever it changes. *Ours:* `BuoyTending.Phase` and `phase`.
+
+**Top level.** A `Node3D` normally moves with its parent. Turning on `top_level` cuts that tie: its position is the world position and it ignores the parent's moves. Setting it doesn't move the node, it just reinterprets its numbers as global, so set `global_position` straight after. *Ours:* your figure and the lantern leave the rowing boat to climb the buoy (`top_level = true`), then rejoin it (`false`, local position restored).
+
+**Marker3D as an attach point.** A `Marker3D` is an empty spot in space with a name. Scripts look markers up by name or export, so a model can be swapped for a new one as long as it has markers with the same names. *Ours:* `TieUp`, `ClimbTop`, `LanternPerch`, `LanternSpot` and the `BuoySpot` markers on the buoy; a Meshy buoy later keeps the same ones.
+
+**Rumble and why one object runs all three.** `Input.start_joy_vibration(device, weak, strong, duration)` shakes a controller's motors for a moment; `stop_joy_vibration` cuts it. A hum you want to hear, feel and see is one thing with three outputs, so one script (`ChainHum`) owns the on/off state and the others (the chain's shiver, the drips) read it. Stopping it stops all three at once. *Ours:* `ChainHum`, `ChainHand`.
+
+**A sound made in code.** An `AudioStreamWAV` is a sound held in memory as bytes; fill `data` with 16-bit samples from a sum, set `loop_mode`, and it plays like any recorded sound. A loop only sounds smooth if it holds whole cycles of the note, so the end meets the start. *Ours:* the placeholder hum in `ChainHum.recording()` (the lantern's `Hum` does the same).
+
+**CPUParticles3D drips.** `CPUParticles3D` is the simple particle node (drawn from a mesh you give it, no shader needed). With `one_shot` on, `restart()` fires one burst, so a script can time drips to something else. *Ours:* `ChainHand` fires a burst of drips on each throb of the hum.
+
+**Reticle and focus by aim.** With no walking, "what am I using" is "what am I looking at": compare the camera's forward direction with the direction to each usable spot and take the nearest within an angle. `Vector2.angle_to()` gives the angle between two flat directions. *Ours:* `BuoyTending.best_spot()`.
+
 ## Testing
 
 **gdUnit4.** The test framework (`addons/gdUnit4`). Suites extend our `GameTestSuite` and have `test_...` functions. `scene_runner` loads a scene and lets a test press inputs and wait physics ticks. *Ours:* `tests/`.
