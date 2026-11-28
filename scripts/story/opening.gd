@@ -21,6 +21,8 @@ extends Node
 ## title, then the cove, on deck at anchor.
 ##
 ## Set [member skip] to start straight on deck instead (tests and tools do).
+## Or open on the dark deck, the ship asleep, with [member awakening]'s
+## Start Here (#249): the opening stands aside for it.
 
 ## Emitted when the opening's over and you can move.
 signal finished
@@ -44,6 +46,8 @@ const ISLAND_SCENE: String = "res://scenes/prototype/islands/cove.tscn"
 @export var player: Player3D
 ## The ship they wake aboard.
 @export var ship: Ship
+## The ship coming alive (#249). If it starts here, there's no opening.
+@export var awakening: ShipAwakening
 ## Where they wake, in the ship's space: by their bunk.
 @export var wake_spot: Vector3 = Vector3(3.6, 1.05, 13.45)
 ## The cutscene the game opens with: a file in data/dialogue.
@@ -70,6 +74,8 @@ var _playing: bool = false
 
 func _ready() -> void:
 	if skip or player == null or ship == null:
+		return
+	if awakening != null and awakening.start_here:
 		return
 	_playing = true
 	# Black from the very first frame, before anything is seen.

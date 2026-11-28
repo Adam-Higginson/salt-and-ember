@@ -3,6 +3,8 @@
 # for how these files are written.
 
 ~ start
+? captain_asleep
+-> asleep
 ? not met_heron
 -> first
 ? deck_talk and not at_cove
@@ -18,6 +20,40 @@ heron: You again. Sit, if you're stopping.
 ? else
 heron: Bit of a rough night out there, isn't it?
 -> ask
+
+# The Unmooring (#249): you find him cold and barely awake by his cabin door,
+# once the stove is lit and he's coughed. One weak exchange, then he's asleep
+# again until the first meal brings him round (remedy.dlg).
+~ asleep
+? not stove_lit
+-> asleep_cold
+? not captain_stirred
+-> stirs
+narrator: He's asleep again, breathing slow. The stove's warmth will have to do.
+-> END
+
+~ asleep_cold
+narrator: The captain, slumped by his cabin door, cold to the touch. Breathing, just.
+lantern: ...He needs warmth. The stove...
+-> END
+
+~ stirs
+@wait 0.6
+heron: ...Who... are you?
+@wait 1.0
+heron: ...Don't let the stove go out.
+@wait 0.8
+heron: ...Pot's... on the hook. Take it. ...Something hot...
+set has_saucepan
+@hold_up saucepan
+narrator: You got the *Cooking Pot*! Set it on the *hob* to cook in it.
+@put_away
+@wait 0.6
+narrator: His head sinks back. He's asleep again.
+set captain_stirred
+set met_heron
+lantern: ...He gave us the pot. Try the old cookbook by the stove.
+-> END
 
 # The first meeting, the Prologue's Scene 4 (#186): after the waking he goes
 # up to the helm (FirstQuest walks him there), and that's where you find him.

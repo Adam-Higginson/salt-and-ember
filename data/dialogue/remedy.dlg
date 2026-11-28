@@ -9,6 +9,7 @@
 # goes back up to the wheel, where the deck talk finds him (#187).
 
 ~ start
+clear captain_asleep
 @send heron captain_supper_seat
 @place player supper_seat
 @place lantern lantern_arrives

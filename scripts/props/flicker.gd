@@ -10,6 +10,9 @@ extends OmniLight3D
 @export_range(0.0, 1.0) var amount: float = 0.25
 ## How quickly it wavers: higher is a livelier fire.
 @export var speed: float = 6.0
+## How much of its brightness is on, 0 (out) to 1 (all of it): a ship's
+## lights are brought up and down through this, without losing their waver.
+@export_range(0.0, 1.0) var level: float = 1.0
 
 var _noise: FastNoiseLite = FastNoiseLite.new()
 var _time: float = 0.0
@@ -35,4 +38,4 @@ func _process(delta: float) -> void:
 ## [member base_energy] times (1 ± [member amount]).
 func energy_at(time: float) -> float:
 	var waver: float = clampf(_noise.get_noise_1d(time * speed) * 1.6, -1.0, 1.0)
-	return base_energy * (1.0 + amount * waver)
+	return base_energy * (1.0 + amount * waver) * level

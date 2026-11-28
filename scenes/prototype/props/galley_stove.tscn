@@ -8,6 +8,10 @@
 [ext_resource type="Shader" path="res://shaders/pixel_fire.gdshader" id="5_qcsfr"]
 [ext_resource type="Material" path="res://assets/placeholder/materials/iron.tres" id="6_pgcco"]
 [ext_resource type="Script" path="res://scripts/props/flicker.gd" id="7_0s3pi"]
+[ext_resource type="Script" path="res://scripts/interaction/interactable_3d.gd" id="8_reach"]
+
+[sub_resource type="BoxShape3D" id="Shape_Reach"]
+size = Vector3(1.8, 1.6, 1.4)
 
 [sub_resource type="BoxMesh" id="BoxMesh_v2ef1"]
 size = Vector3(1.62, 0.1, 1.12)
@@ -337,3 +341,11 @@ path = "res://assets/third_party/meshy/galley_hearth/model/model.glb"
 fit_size = Vector3(1.62, 1.98, 1.34)
 stretch = true
 stand_ins = [NodePath("../Plinth"), NodePath("../Back"), NodePath("../PierLeft"), NodePath("../PierRight"), NodePath("../Lintel"), NodePath("../Sill"), NodePath("../SootBack"), NodePath("../SootLeft"), NodePath("../SootRight"), NodePath("../SootTop"), NodePath("../EmberBed"), NodePath("../LogBack"), NodePath("../LogFront"), NodePath("../Fire"), NodePath("../ArchStone1"), NodePath("../ArchStone2"), NodePath("../ArchStone3"), NodePath("../ArchStone4"), NodePath("../ArchStone5"), NodePath("../Quoin1"), NodePath("../Quoin2"), NodePath("../Quoin3"), NodePath("../Quoin4"), NodePath("../Top"), NodePath("../Rail"), NodePath("../RailBracket1"), NodePath("../RailBracket2"), NodePath("../Flue"), NodePath("../FlueCollar")]
+
+[node name="Reach" type="Area3D" parent="."]
+script = ExtResource("8_reach")
+focus_height = 1.6
+
+[node name="Shape" type="CollisionShape3D" parent="Reach"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 1.05)
+shape = SubResource("Shape_Reach")
