@@ -1,0 +1,67 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/painted_sky.gdshader" id="1_sky"]
+
+[sub_resource type="FastNoiseLite" id="Noise_cloud"]
+noise_type = 3
+seed = 11
+frequency = 0.012
+fractal_type = 0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture_cloud"]
+width = 512
+height = 512
+seamless = true
+noise = SubResource("Noise_cloud")
+
+[sub_resource type="FastNoiseLite" id="Noise_shape"]
+noise_type = 3
+seed = 7
+frequency = 0.05
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture3D" id="NoiseTexture_shape"]
+width = 64
+height = 64
+depth = 64
+seamless = true
+noise = SubResource("Noise_shape")
+
+[sub_resource type="FastNoiseLite" id="Noise_puffs"]
+noise_type = 2
+seed = 21
+frequency = 0.12
+fractal_type = 0
+
+[sub_resource type="NoiseTexture3D" id="NoiseTexture_puffs"]
+width = 32
+height = 32
+depth = 32
+invert = true
+seamless = true
+noise = SubResource("Noise_puffs")
+
+[resource]
+shader = ExtResource("1_sky")
+shader_parameter/cloud_noise = SubResource("NoiseTexture_cloud")
+shader_parameter/cloud_shape = SubResource("NoiseTexture_shape")
+shader_parameter/cloud_puffs = SubResource("NoiseTexture_puffs")
+shader_parameter/cloud_size = 16000.0
+shader_parameter/puff_size = 2600.0
+shader_parameter/cloud_density = 0.02
+shader_parameter/light_absorption = 0.8
+shader_parameter/ambient_top = 0.4
+shader_parameter/ambient_bottom = 0.15
+shader_parameter/light_gain = 1.8
+shader_parameter/silver_lining = 1.4
+shader_parameter/glow_strength = 0.7
+shader_parameter/glow_color = Color(1, 0.42, 0.15, 1)
+shader_parameter/sun_strength = 3.0
+shader_parameter/sun_color = Color(1, 0.78, 0.42, 1)
+shader_parameter/shade_color = Color(0.55, 0.34, 0.58, 1)
+shader_parameter/lit_color = Color(1, 0.5, 0.27, 1)
+shader_parameter/rim_color = Color(1, 0.72, 0.38, 1)
+shader_parameter/glow_tightness = 9.0
+shader_parameter/mid_height = 0.08
+shader_parameter/horizon_away_color = Color(0.6, 0.36, 0.52, 1)
+shader_parameter/cloud_cover = 0.45

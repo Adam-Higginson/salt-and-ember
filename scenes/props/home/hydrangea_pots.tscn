@@ -1,0 +1,73 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="1_meshy"]
+
+[sub_resource type="StandardMaterial3D" id="Clay"]
+albedo_color = Color(0.72, 0.42, 0.24, 1)
+metallic = 0
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Stone"]
+albedo_color = Color(0.72, 0.7, 0.66, 1)
+metallic = 0
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Leaf"]
+albedo_color = Color(0.3, 0.5, 0.22, 1)
+metallic = 0
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="Slab"]
+size = Vector3(1.2, 0.08, 0.9)
+
+[sub_resource type="CylinderMesh" id="BigPot"]
+top_radius = 0.28
+bottom_radius = 0.2
+height = 0.55
+radial_segments = 8
+
+[sub_resource type="CylinderMesh" id="SmallPot"]
+top_radius = 0.18
+bottom_radius = 0.13
+height = 0.36
+radial_segments = 8
+
+[sub_resource type="SphereMesh" id="Bloom"]
+radius = 0.28
+height = 0.4
+radial_segments = 8
+rings = 4
+
+[node name="HydrangeaPots" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/hydrangea_pots, drawn by the Model node: three clay pots of pink and blue hydrangeas on a stone slab, a dressing prop for doors and steps (front faces +Z). No attach points. The greybox shows when the art is missing."
+
+[node name="Slab" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.04, 0)
+material_override = SubResource("Stone")
+mesh = SubResource("Slab")
+
+[node name="BigPot" type="MeshInstance3D" parent="."]
+position = Vector3(0.22, 0.355, 0)
+material_override = SubResource("Clay")
+mesh = SubResource("BigPot")
+
+[node name="SmallPot" type="MeshInstance3D" parent="."]
+position = Vector3(-0.3, 0.26, 0.05)
+material_override = SubResource("Clay")
+mesh = SubResource("SmallPot")
+
+[node name="BigBloom" type="MeshInstance3D" parent="."]
+position = Vector3(0.22, 0.85, 0)
+material_override = SubResource("Leaf")
+mesh = SubResource("Bloom")
+
+[node name="SmallBloom" type="MeshInstance3D" parent="."]
+position = Vector3(-0.3, 0.62, 0.05)
+material_override = SubResource("Leaf")
+mesh = SubResource("Bloom")
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+script = ExtResource("1_meshy")
+path = "res://assets/third_party/meshy/hydrangea_pots/model/model.glb"
+fit_size = Vector3(1.2, 1.07, 0.9)
+stand_ins = [NodePath("../Slab"), NodePath("../BigPot"), NodePath("../SmallPot"), NodePath("../BigBloom"), NodePath("../SmallBloom")]

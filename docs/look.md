@@ -86,6 +86,26 @@ In `golden_cabin.tres`, group **Glow**:
 - **HDR Threshold** (default 1.6): how bright something must be before it blooms. Raise it so only lanterns and the window glow; lower it and sunlit coats start to glow too.
 - **Bloom** (default 0.02): a haze over everything; keep it near 0 for a crisp picture.
 
+## The painted dusk (home waters, the opening)
+
+Home waters has its own sky, grade and sea; the rest of the game is untouched. Try it with F6 on `scenes/prototype/intro/home_waters.tscn`.
+
+| Part | File | Dials |
+|---|---|---|
+| The sky: gradient, sun, 3D painted clouds | `shaders/painted_sky.gdshader`, set in `data/art/skies/home_dusk_sky.tres` | Groups in the Inspector: *Sun* (disc, warm glow), *Sky Colors* (orange horizon on the sun's side, rose away), *Cumulus* (heights, cover, patchiness, density, size, wind), *Cumulus Light* (steps, Beer's law absorption, powder, silver lining, ambient, light gain), *Cloud Paint* (band count and softness, the four light colours, edge crispness), *Streaks* (high stratus), *Painted Finish* (ragged edges, canvas weave). |
+| The grade, fog, glow | `data/art/environments/home_dusk.tres` | Ambient (a cool blue-violet; the warm light comes only from the `Sun`), Tonemap (AgX), Adjustments (saturation 1.2, contrast 1.12 and the colour ramp), Fog (thin indigo, density 0.001, so the buoy stays readable), Glow (threshold 1.8). |
+| The sea | `assets/placeholder/materials/water_dusk.tres` (the shared shader is `shaders/water.gdshader`) | `deep_color` (navy), `paint_waves` (+ length, speed: short peaked wave strokes), `reflection_bands` and `reflection_floor` (painted steps on the wave faces, and how much sky near faces still catch), `glitter` and `sun_path` (+ width, colour: the orange column of sun), `sky_clouds` (stand-in clouds in the reflection), `sky_specular` (Godot's own reflection, 0 here: the shader paints it), `far_blend`, `foam_crisp`, and the sky colours/sun direction it mirrors. |
+| Painted picture | the `PaintedLook` node, `keep_scene_grade` on | `haze_color` (dusky violet), `haze_strength` (0.1: more washed the picture out). With `keep_scene_grade` it leaves tone mapping, saturation and glow to the Environment, so the scene is graded once. |
+| Lamp halos | `Halo` on the hanging lantern in `scenes/props/home/lamp_post.tscn` (it swings with it), material `assets/placeholder/materials/lamp_halo.tres` | The material's colour alpha (strength) and the quad's size. |
+
+The sun's direction is read from the `Sun` node by the sky, but the water can't read it: if you turn the `Sun`, change *Sky Sun Direction* in `water_dusk.tres` to match. The night materials (`water.tres`) leave every dusk dial at 0, so the Grave and the ship's sea look as before.
+
+The look (#247, third pass) is matched to a repaint of our own frame: a cool, dark world with warm focal points. Deep navy and indigo sea with violet-lit wave strokes; a vivid orange-gold sun path straight down the water; a purple sky with big soft cumulus, coral and orange on the sun side and violet underneath; a glowing orange horizon band; lanterns that really glow. Warm colour is saved for the sun, its path, the horizon, sunlit clouds and lamps.
+
+The clouds are raymarched (see *Raymarching* and *Beer's law* in `docs/godot-notes.md`), then painted: the light is cut into four soft bands and the outline is cut sharp and roughened with brush noise. If they look too busy, lower *Cloud Cover* or raise *Band Softness*; for fatter lit sides, raise *Light Gain* or lower *Light Absorption*.
+
+Cost (measured with the viewport's GPU timer on an RTX 4090 at 1920x1080, `march_steps` 18, `light_steps` 3): about 1.70 ms a frame with the cumulus, 1.65 ms without, so about 0.06 ms for the clouds. A mid-range card is perhaps eight times slower, about 0.5 ms. They are drawn at half resolution, rays below the horizon or past `cloud_far` stop at once, a ray stops once the cloud is solid, and the ambient cube map (Incremental, 128 px) uses half the steps and one sun step. Lower `march_steps` first if a machine struggles.
+
 ## What's not stylised
 
 Only characters get the cel shader and outline. Rooms and props keep their own materials (and so their texture detail), and are drawn into the same palette by the light: the warm sun, the ambient colour, and the tone mapping.

@@ -782,6 +782,10 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 
 **A wall for something that isn't a physics body.** A collision shape only stops physics bodies, and the rowboat is moved by script. So the wall is a sum instead: if the boat's inside the circle, put it back on the edge and take away the part of its speed heading in, which leaves it free to slide along. `Geometry2D.get_closest_point_to_segment()` is the same kind of flat sum for "how near a line". *Ours:* `KeepClear` (`scripts/sea/keep_clear.gd`) round the island, the buoy and the chain's foot; `HomeWaters.chain_distance()`.
 
+**Attach points.** A `Marker3D` named for the job (`LanternHook`, `ChainEye`, `SmokeOut`) marks where another part joins a prop. The part is a child of the marker (or reads its position), so swapping a model or moving a joint is one edit and the rest follows. *Ours:* the lamp post's `LanternHook` holds the hanging lantern; the rowboat's `OarlockPort` and `OarlockStarboard` are where its oars pivot; the mooring's `ChainEye` is where the great chain starts. The list for each model is in `docs/meshy.md` (Model library).
+
+**`editor_description`.** A free-text note every node has, shown in the Inspector and saved in the scene, so a scene with no script can still say what it is. *Ours:* each home-waters prop's root names its Meshy model and its attach points.
+
 **Soft particles from a gradient.** A particle drawn as a plain `QuadMesh` is a hard square. A `GradientTexture2D` with `fill` set to Radial makes a soft dot from a gradient (white in the middle, clear at the edge), and as the quad's texture it makes each particle a puff. With *Billboard* set to Particle the quads always face the camera. *Ours:* the chimney smoke over each cottage in `home_waters.tscn`.
 
 ## Tending the buoy (#228)
@@ -799,6 +803,32 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 **CPUParticles3D drips.** `CPUParticles3D` is the simple particle node (drawn from a mesh you give it, no shader needed). With `one_shot` on, `restart()` fires one burst, so a script can time drips to something else. *Ours:* `ChainHand` fires a burst of drips on each throb of the hum.
 
 **Reticle and focus by aim.** With no walking, "what am I using" is "what am I looking at": compare the camera's forward direction with the direction to each usable spot and take the nearest within an angle. `Vector2.angle_to()` gives the angle between two flat directions. *Ours:* `BuoyTending.best_spot()`.
+
+## The painted dusk (sky, water and grade)
+
+**Sky shader (`shader_type sky;`).** A shader that paints the whole background from the view direction (`EYEDIR`) instead of from a mesh. Godot also uses what it paints for the scene's ambient light and reflections, so the sky tints everything. A sky shader can read the scene's first directional light (`LIGHT0_DIRECTION`, `LIGHT0_COLOR`). *Ours:* `shaders/painted_sky.gdshader`, held in `data/art/skies/home_dusk_sky.tres`.
+
+**Radiance (and `AT_CUBEMAP_PASS`).** The sky is also drawn into a small cube map called the radiance map, which is blurred for ambient light and reflections. The `Sky` resource's *Process Mode* says how often: Real-time every frame, Quality once, Incremental a little each frame. Clouds that drift slowly only need Incremental, with a small *Radiance Size*. Inside the shader, `AT_CUBEMAP_PASS` is true while it is drawing that cube map, so we skip the fine detail there. Only sky shaders have `RADIANCE`; a surface shader (the water) can't read it, so the water copies the sky's colours by hand. *Ours:* `data/art/environments/home_dusk.tres` (Sky > Process Mode, Radiance Size).
+
+**`group_uniforms`.** A line in a shader (`group_uniforms clouds;`) that files the uniforms after it under a heading in the Inspector, so a material with dozens of dials stays readable. `group_uniforms;` on its own ends the group. *Ours:* the sky's `sun`, `sky_colors`, `cumulus`, `cumulus_light`, `cloud_paint`, `streaks` and `painted_finish` groups.
+
+**FBM and domain warping.** FBM (fractal Brownian motion) adds copies of one noise, each twice as fine and half as strong, which makes cloud-like, rocky shapes. Domain warping reads that noise at a position first pushed about by other noise, which swirls the shapes into brushed streaks instead of smoke. *Ours:* `fbm()` and `streak_field()` in the sky shader (the high streaks).
+
+**Raymarching.** Drawing something that has no surface (cloud, smoke) by walking along each pixel's view ray in steps and asking at each step "how thick is it here?", adding up what's met. More steps look smoother and cost more. *Ours:* `cumulus()` in the sky shader walks 18 steps through a slab of sky 1.4 to 3.4 km up, where the thickness comes from `cumulus_at()`.
+
+**3D noise texture (`NoiseTexture3D`, `sampler3D`).** A noise baked into a small cube of pixels (64 x 64 x 64 here), read in a shader with a 3D position. Seamless, so it repeats without seams. Cheaper than working noise out in the shader. Cellular (Worley) noise, inverted, makes round puffs. *Ours:* `cloud_shape` and `cloud_puffs` in `home_dusk_sky.tres`.
+
+**Beer's law, powder and phase.** How light dims through cloud: what gets through is `exp(-thickness)`, so a little cloud in the way dims it a little and a lot almost blacks it out. The sky shader takes a few steps from each cloud point towards the sun to measure that thickness, which is what lights the sun side and leaves the far side violet. The "powder" term darkens thin edges facing away from the sun, and a phase function (Henyey-Greenstein) makes clouds between you and the sun glow at their rims (the silver lining). *Ours:* the `cumulus_light` group.
+
+**Half-resolution sky pass (`use_half_res_pass`).** A sky shader can ask Godot to run it a second time at half the screen size first; inside, `AT_HALF_RES_PASS` is true for that run, and the full-size run reads its result as `HALF_RES_COLOR`. Costly parts (our clouds) go in the small run, a quarter of the pixels. *Ours:* the cumulus are drawn there and laid over the full-size gradient and sun.
+
+**Posterising.** Cutting a smooth brightness into a few steps (with a slightly soft edge) so shading reads as flat paint. *Ours:* `posterise()` in the sky shader gives the clouds their shadow, shade, lit and rim bands; the water's `reflection_bands` does the same to the mirrored sky on wave faces.
+
+**Anisotropic glitter.** "Anisotropic" means different in different directions. A low sun's path on the sea is long and narrow because a wave face only has to tilt the right way up and down (along the line to the sun) but almost exactly the right way sideways. The water shader's glint test is loose in one direction and tight in the other, so the glints line up into a column. *Ours:* `glitter` and `sun_path` in `shaders/water.gdshader`.
+
+**Colour correction ramp.** The Environment's *Adjustments > Color Correction* takes a 1D gradient that remaps each colour channel, after tone mapping. A ramp with a little blue in the darks and a little less blue in the lights makes violet shadows and amber highlights. *Ours:* the gradient in `home_dusk.tres`.
+
+**Local to scene.** An Environment saved as a `.tres` is shared by everything that loads it. Setting *Local to Scene* gives each scene its own copy, so home waters can change the fog without touching the file. *Ours:* `home_dusk.tres`.
 
 ## Testing
 
