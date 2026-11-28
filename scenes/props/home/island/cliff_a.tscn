@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="1_meshy"]
+
+[sub_resource type="StandardMaterial3D" id="Rock"]
+albedo_color = Color(0.45, 0.4, 0.5, 1)
+metallic = 0
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="Block"]
+size = Vector3(8, 6, 4)
+
+[node name="CliffA" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/cliff_a, drawn by the Model node: a stepped purple rock face with grass and thrift on top, about 8 x 6 x 4 m. Its face looks along +Z and its back and sides are flat-ish, so several stand side by side in a cliff line. For the home island; placed by the terrain work. The greybox shows when the art is missing."
+
+[node name="Block" type="MeshInstance3D" parent="."]
+position = Vector3(0, 3, 0)
+material_override = SubResource("Rock")
+mesh = SubResource("Block")
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+script = ExtResource("1_meshy")
+path = "res://assets/third_party/meshy/cliff_a/model/model.glb"
+fit_size = Vector3(8, 6, 4)
+stretch = true
+stand_ins = [NodePath("../Block")]

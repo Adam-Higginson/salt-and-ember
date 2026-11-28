@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="1_meshy"]
+
+[sub_resource type="StandardMaterial3D" id="Bloom"]
+albedo_color = Color(0.6, 0.3, 0.55, 1)
+metallic = 0
+roughness = 0.95
+
+[sub_resource type="SphereMesh" id="Tuft"]
+radius = 0.6
+height = 0.5
+radial_segments = 8
+rings = 4
+
+[node name="Heather" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/heather, drawn by the Model node: a low clump of purple heather in grass, about 1.2 m across and 0.45 m high, to scatter over the island. For the home island; placed by the terrain work. The greybox shows when the art is missing."
+
+[node name="Tuft" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.15, 0)
+material_override = SubResource("Bloom")
+mesh = SubResource("Tuft")
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+script = ExtResource("1_meshy")
+path = "res://assets/third_party/meshy/heather/model/model.glb"
+fit_size = Vector3(1.2, 0.6, 1.2)
+stand_ins = [NodePath("../Tuft")]

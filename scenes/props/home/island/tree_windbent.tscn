@@ -1,0 +1,44 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="1_meshy"]
+
+[sub_resource type="StandardMaterial3D" id="Bark"]
+albedo_color = Color(0.4, 0.28, 0.25, 1)
+metallic = 0
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Leaf"]
+albedo_color = Color(0.45, 0.55, 0.2, 1)
+metallic = 0
+roughness = 0.95
+
+[sub_resource type="CylinderMesh" id="Trunk"]
+top_radius = 0.3
+bottom_radius = 0.5
+height = 3.5
+radial_segments = 8
+
+[sub_resource type="SphereMesh" id="Crown"]
+radius = 2.6
+height = 2.4
+radial_segments = 8
+rings = 4
+
+[node name="TreeWindbent" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/tree_windbent, drawn by the Model node: a wind-bent island tree on a small grass mound, about 6 m tall and 8.8 m across, its crown leaning towards -X. For the home island; placed by the terrain work. The greybox shows when the art is missing."
+
+[node name="Trunk" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 1.75, 0)
+material_override = SubResource("Bark")
+mesh = SubResource("Trunk")
+
+[node name="Crown" type="MeshInstance3D" parent="."]
+position = Vector3(-0.5, 4.6, 0)
+material_override = SubResource("Leaf")
+mesh = SubResource("Crown")
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+script = ExtResource("1_meshy")
+path = "res://assets/third_party/meshy/tree_windbent/model/model.glb"
+fit_size = Vector3(8.84, 6, 6.3)
+stand_ins = [NodePath("../Trunk"), NodePath("../Crown")]
