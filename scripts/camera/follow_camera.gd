@@ -42,6 +42,9 @@ const MAX_ELEVATION: float = 1.5
 @export var return_delay: float = 1.5
 ## How quickly the look eases back to behind the target: higher is snappier.
 @export var return_response: float = 2.0
+## While true the look stays where the player left it and never eases back.
+## For when you aim by looking (on the buoy, #228).
+@export var hold_look: bool = false
 ## The closest the camera zooms in, in metres.
 @export var zoom_min: float = 3.0
 ## The furthest the camera zooms out, in metres.
@@ -138,7 +141,7 @@ func look(yaw_degrees: float, pitch_degrees: float) -> void:
 # Once the player has stopped looking for return_delay, eases the look back
 # to zero. lerp_angle takes the short way round.
 func _ease_look_back(delta: float) -> void:
-	if _idle_seconds < return_delay:
+	if hold_look or _idle_seconds < return_delay:
 		return
 	var step: float = 1.0 - exp(-return_response * delta)
 	_look_yaw = lerp_angle(_look_yaw, 0.0, step)

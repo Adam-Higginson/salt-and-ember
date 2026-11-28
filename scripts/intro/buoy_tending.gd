@@ -10,8 +10,8 @@ extends Node
 ## [br]- [b]Alongside:[/b] interact ties up. The boat is drawn to the buoy.
 ## [br]- [b]Climbing up:[/b] a short shot: you step onto the float and up the
 ## ladder, the camera following.
-## [br]- [b]On the buoy:[/b] you stay where you stand, on the platform, and look
-## around (mouse or right stick). Turn towards something and the prompt
+## [br]- [b]On the buoy:[/b] you stand to one side of the lamp, on the platform,
+## and look around (mouse or right stick; the camera stays where you point it). Turn towards something and the prompt
 ## names it: the chain, the lamp, the ladder (each a [BuoySpot]). Interact
 ## uses it. The chain and the lamp work in any order, and you can't leave
 ## except down the ladder, which only works once both are done.
@@ -74,6 +74,10 @@ const LAMP_LIT: StringName = &"lamp_lit"
 const NOT_YET: StringName = &"not_yet"
 const SUPPER: StringName = &"supper"
 
+## How far through the climb you reach the top of the ladder; the rest is the
+## walk across the platform to where you stand.
+const PLATFORM_SHARE_START: float = 0.8
+
 ## The boat you row.
 @export var boat: Rowboat
 ## Your figure in the boat, which climbs the buoy.
@@ -84,11 +88,14 @@ const SUPPER: StringName = &"supper"
 @export var lantern: BowLantern
 ## The buoy.
 @export var buoy: Node3D
-## Where the boat ties up: its distance from the buoy's middle. The boat ties
-## up on whichever side it came in on.
+## Where the boat ties up: its distance from the buoy's middle, which leaves a
+## small gap between the bow and the float. The boat ties up on whichever side
+## it came in on.
 @export var tie_point: Marker3D
-## Where you stand on the platform.
+## The top of the ladder, where the climb comes up onto the platform.
 @export var climb_top: Marker3D
+## Where you stand on the platform: to one side, clear of the lamp.
+@export var stand_spot: Marker3D
 ## Where the lantern hovers by you on the platform.
 @export var lantern_perch: Marker3D
 ## Where the lantern hovers to light the lamp.
@@ -118,7 +125,11 @@ const SUPPER: StringName = &"supper"
 
 @export_group("Looking")
 ## How close, in degrees across the water, the camera must point at a spot.
-@export var focus_degrees: float = 22.0
+@export var focus_degrees: float = 40.0
+## How far, in degrees, the camera is turned off the line from you to the lamp,
+## so you aren't standing between it and the lamp. At rest it looks past you
+## at the chain side.
+@export var view_offset_degrees: float = 35.0
 ## How far behind you the camera sits on the platform, in metres.
 @export var platform_zoom: float = 4.0
 ## How high the float's deck is above the water, where you step off the boat.
@@ -228,7 +239,7 @@ func tie_up() -> bool:
 	_progress = 0.0
 	_zoom_before = camera.distance if camera != null else 6.5
 	phase = Phase.TYING_UP
-	_say(TIED_UP)
+	_say(TIED_UP, func() -> bool: return phase <= Phase.CLIMBING_UP)
 	return true
 
 
@@ -256,9 +267,9 @@ func is_ready_to_leave() -> bool:
 ## Works out which spot the camera is pointing at.
 func refresh_focus() -> void:
 	focused = null
-	if phase != Phase.ON_BUOY or camera == null or climb_top == null:
+	if phase != Phase.ON_BUOY or camera == null or stand_spot == null:
 		return
-	focused = best_spot(spots, climb_top.global_position, -camera.global_basis.z,
+	focused = best_spot(spots, stand_spot.global_position, -camera.global_basis.z,
 			focus_degrees)
 
 
@@ -296,6 +307,18 @@ static func climb_point(from: Vector3, deck: Vector3, top: Vector3,
 		var t: float = p / split
 		return from.lerp(deck, smoothstep(0.0, 1.0, t)) + Vector3.UP * sin(PI * t) * 0.25
 	return deck.lerp(top, smoothstep(0.0, 1.0, (p - split) / (1.0 - split)))
+
+
+## Where you are [param progress] (0 to 1) of the way up the ladder and across
+## to your standing place: [method climb_point] to [param top] (the top of the
+## ladder) for most of it, then a few steps across the platform to [param stand].
+static func climb_path(from: Vector3, deck: Vector3, top: Vector3, stand: Vector3,
+		progress: float) -> Vector3:
+	var p: float = clampf(progress, 0.0, 1.0)
+	if p < PLATFORM_SHARE_START:
+		return climb_point(from, deck, top, p / PLATFORM_SHARE_START)
+	var t: float = (p - PLATFORM_SHARE_START) / (1.0 - PLATFORM_SHARE_START)
+	return top.lerp(stand, smoothstep(0.0, 1.0, t))
 
 
 # --- The boat -------------------------------------------------------------
@@ -346,11 +369,12 @@ func _climb_step(delta: float, up: bool) -> void:
 	var boat_spot: Vector3 = boat.to_global(_rower_rest)
 	var deck: Vector3 = buoy.to_global(Vector3(climb_top.position.x, deck_height,
 			climb_top.position.z + 0.5))
-	var at: Vector3 = climb_point(boat_spot, deck, climb_top.global_position, p)
+	var at: Vector3 = climb_path(boat_spot, deck, climb_top.global_position,
+			stand_spot.global_position, p)
 	rower.global_position = at
 	rower.rotation.y = _yaw_towards_buoy(at)
 	_stand.global_position = at
-	_stand.rotation.y = rower.rotation.y
+	_stand.rotation.y = rower.rotation.y + deg_to_rad(view_offset_degrees)
 	if _progress >= 1.0:
 		if up:
 			_arrive_on_buoy()
@@ -360,16 +384,21 @@ func _climb_step(delta: float, up: bool) -> void:
 
 func _arrive_on_buoy() -> void:
 	phase = Phase.ON_BUOY
+	# You aim by looking, so the camera stays where you point it.
+	camera.hold_look = true
 	if reticle != null:
 		reticle.visible = true
-	_say(ON_PLATFORM)
+	# "Chain first, then the lamp" is only worth saying while neither is done.
+	_say(ON_PLATFORM, func() -> bool:
+		return phase == Phase.ON_BUOY and lamp_phase == LampPhase.IDLE \
+				and (chain_hand == null or not chain_hand.is_humming()))
 
 
 func _stand_on_platform() -> void:
-	rower.global_position = climb_top.global_position
+	rower.global_position = stand_spot.global_position
 	rower.rotation.y = _yaw_towards_buoy(rower.global_position)
 	_stand.global_position = rower.global_position
-	_stand.rotation.y = rower.rotation.y
+	_stand.rotation.y = rower.rotation.y + deg_to_rad(view_offset_degrees)
 
 
 # Back in the boat: the job's done.
@@ -379,6 +408,7 @@ func _finish() -> void:
 	rower.rotation.y = _rower_rest_yaw
 	rower.reset_physics_interpolation()
 	camera.target = boat
+	camera.hold_look = false
 	camera.zoom_to(_zoom_before)
 	phase = Phase.TENDED
 	_say(SUPPER)
@@ -416,11 +446,12 @@ func _climb_down() -> bool:
 	if not is_ready_to_leave():
 		# Not yet: say so, but don't talk over himself.
 		if lantern.voice != null and not lantern.voice.is_busy():
-			_say(NOT_YET)
+			_say(NOT_YET, func() -> bool: return phase == Phase.ON_BUOY)
 		return false
 	if reticle != null:
 		reticle.visible = false
 	focused = null
+	camera.hold_look = false
 	lantern.send_home()
 	_progress = 0.0
 	phase = Phase.CLIMBING_DOWN
@@ -482,11 +513,14 @@ func _on_flame_given() -> void:
 
 # --- Words and prompts ----------------------------------------------------
 
-func _say(moment: StringName) -> void:
+# Says [param moment]'s lines after whatever he's saying. [param still_wanted]
+# is asked when each line's turn comes: false drops it, so a line about a
+# state (chain first, then the lamp) doesn't play once that state has passed.
+func _say(moment: StringName, still_wanted: Callable = Callable()) -> void:
 	if lantern == null or lantern.voice == null:
 		return
 	for line: DialogueStep in HomeWaters.lines_for(moment):
-		lantern.voice.say(line.text, Speaker.style_for(line.tag))
+		lantern.voice.say(line.text, Speaker.style_for(line.tag), still_wanted)
 
 
 # The words that name what interact would do now ("" for nothing).

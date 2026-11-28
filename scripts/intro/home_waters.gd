@@ -253,6 +253,12 @@ func _arrive() -> void:
 	at_buoy = true
 	# Let the boat glide to a stop alongside: #228 carries on from here.
 	boat.controls_enabled = false
+	# Rowing-out chatter still waiting (a distance or landmark line) is out of
+	# date now: drop it, so tending starts with a clean slate. The line being
+	# said is let finish.
+	waiting.clear()
+	if lantern != null:
+		lantern.clear_waiting()
 	cue(&"at_buoy")
 	if tending != null:
 		tending.arrive()

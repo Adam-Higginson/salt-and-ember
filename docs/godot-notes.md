@@ -804,6 +804,8 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 
 **Reticle and focus by aim.** With no walking, "what am I using" is "what am I looking at": compare the camera's forward direction with the direction to each usable spot and take the nearest within an angle. `Vector2.angle_to()` gives the angle between two flat directions. *Ours:* `BuoyTending.best_spot()`.
 
+**A line that can go stale.** A queued line can carry a `Callable` (a function stored in a variable, here a small `func() -> bool:` written in place) that's asked when the line's turn comes; answering false drops it. Words about a state ("chain first, then the lamp") then don't play once that state has passed. *Ours:* `Speaker.say(..., still_wanted)`, used by `BuoyTending._say()`.
+
 ## The painted dusk (sky, water and grade)
 
 **Sky shader (`shader_type sky;`).** A shader that paints the whole background from the view direction (`EYEDIR`) instead of from a mesh. Godot also uses what it paints for the scene's ambient light and reflections, so the sky tints everything. A sky shader can read the scene's first directional light (`LIGHT0_DIRECTION`, `LIGHT0_COLOR`). *Ours:* `shaders/painted_sky.gdshader`, held in `data/art/skies/home_dusk_sky.tres`.

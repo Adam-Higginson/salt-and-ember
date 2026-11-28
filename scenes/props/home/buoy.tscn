@@ -91,7 +91,7 @@ script = ExtResource("9_float")
 
 [node name="Wall" type="Marker3D" parent="."]
 script = ExtResource("6_wall")
-radius = 4.2
+radius = 4.6
 
 [node name="Model" type="Node3D" parent="."]
 
@@ -371,13 +371,16 @@ material_override = SubResource("Rust")
 mesh = SubResource("LampCap")
 
 [node name="TieUp" type="Marker3D" parent="."]
-position = Vector3(0, 0, 4.4)
+position = Vector3(0, 0, 4.8)
 
 [node name="ClimbTop" type="Marker3D" parent="."]
 position = Vector3(0, 5.25, 1.0)
 
+[node name="StandSpot" type="Marker3D" parent="."]
+position = Vector3(0.8, 5.25, 0.8)
+
 [node name="LanternPerch" type="Marker3D" parent="."]
-position = Vector3(0.8, 6.5, 1.0)
+position = Vector3(0.6, 6.4, 1.45)
 
 [node name="LanternSpot" type="Marker3D" parent="."]
 position = Vector3(-0.55, 5.95, 0.5)

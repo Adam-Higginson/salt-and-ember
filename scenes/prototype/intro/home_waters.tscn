@@ -264,7 +264,7 @@ light_color = Color(1, 0.75, 0.4, 1)
 light_energy = 1.5
 omni_range = 4.0
 
-[node name="BuoyTending" type="Node" parent="." node_paths=PackedStringArray("boat", "rower", "camera", "lantern", "buoy", "tie_point", "climb_top", "lantern_perch", "lantern_spot", "spots", "chain_hand", "lamp", "spark", "prompt", "reticle")]
+[node name="BuoyTending" type="Node" parent="." node_paths=PackedStringArray("boat", "rower", "camera", "lantern", "buoy", "tie_point", "climb_top", "stand_spot", "lantern_perch", "lantern_spot", "spots", "chain_hand", "lamp", "spark", "prompt", "reticle")]
 script = ExtResource("36_tending")
 boat = NodePath("../Rowboat")
 rower = NodePath("../Rowboat/Rower")
@@ -273,6 +273,7 @@ lantern = NodePath("../Rowboat/BowPole/BowLantern")
 buoy = NodePath("../Buoy")
 tie_point = NodePath("../Buoy/TieUp")
 climb_top = NodePath("../Buoy/ClimbTop")
+stand_spot = NodePath("../Buoy/StandSpot")
 lantern_perch = NodePath("../Buoy/LanternPerch")
 lantern_spot = NodePath("../Buoy/LanternSpot")
 spots = [NodePath("../Buoy/ChainSpot"), NodePath("../Buoy/LampSpot"), NodePath("../Buoy/LadderSpot")]

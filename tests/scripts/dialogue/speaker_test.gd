@@ -45,6 +45,37 @@ func test_hushing_cuts_them_off_and_forgets_whats_waiting() -> void:
 	assert_str(_speaker.saying).is_empty()
 
 
+func test_a_line_that_is_out_of_date_by_its_turn_is_dropped() -> void:
+	var runner: GdUnitSceneRunner = _build()
+	var heard: PackedStringArray = PackedStringArray()
+	_speaker.said.connect(func(line: String) -> void: heard.append(line))
+	await physics_ticks(runner, 2)
+	var wanted: Array[bool] = [true]
+
+	_speaker.say("One.")
+	_speaker.say("Stale.", SpeechBubble.Style.SPEECH, func() -> bool: return wanted[0])
+	_speaker.say("Three.")
+	wanted[0] = false
+	await physics_ticks(runner, 60)
+
+	assert_array(Array(heard)).is_equal(["One.", "Three."])
+
+
+func test_clearing_the_queue_lets_the_line_showing_finish() -> void:
+	var runner: GdUnitSceneRunner = _build()
+	var heard: PackedStringArray = PackedStringArray()
+	_speaker.said.connect(func(line: String) -> void: heard.append(line))
+	await physics_ticks(runner, 2)
+
+	_speaker.say("One.")
+	_speaker.say("Two.")
+	_speaker.clear_waiting()
+	await physics_ticks(runner, 60)
+
+	assert_array(Array(heard)).is_equal(["One."])
+	assert_bool(_speaker.is_busy()).is_false()
+
+
 func test_saying_something_now_replaces_what_they_were_saying() -> void:
 	var runner: GdUnitSceneRunner = _build()
 	await physics_ticks(runner, 2)
