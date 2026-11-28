@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/props/home/island/cliff_a.tscn" id="1_cliff_a"]
+[ext_resource type="PackedScene" path="res://scenes/props/home/island/cliff_corner.tscn" id="2_corner"]
+[ext_resource type="PackedScene" path="res://scenes/props/home/island/boulders.tscn" id="3_boulders"]
+[ext_resource type="PackedScene" path="res://scenes/props/home/island/tree_windbent.tscn" id="4_tree"]
+
+[sub_resource type="StandardMaterial3D" id="Ground"]
+albedo_color = Color(0.35, 0.45, 0.3, 1)
+roughness = 1.0
+
+[sub_resource type="PlaneMesh" id="GroundMesh"]
+size = Vector2(60, 24)
+
+[node name="KitGallery" type="Node3D"]
+editor_description = "Lays the five home-island landscape models out in a row on a plain ground, to check their scale (Meshy, docs/meshy.md Model library). Not used by the game."
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+material_override = SubResource("Ground")
+mesh = SubResource("GroundMesh")
+
+[node name="CliffA" parent="." instance=ExtResource("1_cliff_a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 0, 0)
+
+[node name="CliffCorner" parent="." instance=ExtResource("2_corner")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 0)
+
+[node name="Boulders" parent="." instance=ExtResource("3_boulders")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
+
+[node name="TreeWindbent" parent="." instance=ExtResource("4_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 0)
+
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9396926, 0.3420201, 0, -0.3420201, 0.9396926, 0, 9, 24)
+current = true
+fov = 60.0
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 10, 0)

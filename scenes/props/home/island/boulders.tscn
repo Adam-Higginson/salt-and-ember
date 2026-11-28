@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="1_meshy"]
+
+[sub_resource type="StandardMaterial3D" id="Rock"]
+albedo_color = Color(0.45, 0.4, 0.5, 1)
+metallic = 0
+roughness = 0.95
+
+[sub_resource type="SphereMesh" id="BigStone"]
+radius = 1.7
+height = 2.2
+radial_segments = 8
+rings = 4
+
+[sub_resource type="SphereMesh" id="SmallStone"]
+radius = 1.2
+height = 1.5
+radial_segments = 8
+rings = 4
+
+[node name="Boulders" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/boulders, drawn by the Model node: a pair of mossy purple boulders with barnacles, about 5 m across overall. For the home island; placed by the terrain work. The greybox shows when the art is missing."
+
+[node name="BigStone" type="MeshInstance3D" parent="."]
+position = Vector3(-0.6, 0.9, -0.5)
+material_override = SubResource("Rock")
+mesh = SubResource("BigStone")
+
+[node name="SmallStone" type="MeshInstance3D" parent="."]
+position = Vector3(1.2, 0.65, 1.2)
+material_override = SubResource("Rock")
+mesh = SubResource("SmallStone")
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+script = ExtResource("1_meshy")
+path = "res://assets/third_party/meshy/boulders/model/model.glb"
+fit_size = Vector3(4.5, 2.25, 5)
+stand_ins = [NodePath("../BigStone"), NodePath("../SmallStone")]
