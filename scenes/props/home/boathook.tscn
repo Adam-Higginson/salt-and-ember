@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="1_meshy"]
+
+[sub_resource type="StandardMaterial3D" id="Pole"]
+albedo_color = Color(0.45, 0.32, 0.2, 1)
+metallic = 0
+roughness = 0.9
+
+[sub_resource type="CylinderMesh" id="Shaft"]
+top_radius = 0.025
+bottom_radius = 0.025
+height = 2.0
+radial_segments = 8
+
+[node name="Boathook" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/boathook, drawn by the Model node: a wooden pole with a hook-and-spike iron head (fitted to 2 m long, lying along X, hook toward +X or -X as made; origin at the middle of its underside). A dressing prop for the boat and jetty. No attach points. The greybox pole shows when the art is missing."
+
+[node name="Shaft" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.03, 0)
+rotation = Vector3(0, 0, 1.5708)
+material_override = SubResource("Pole")
+mesh = SubResource("Shaft")
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+script = ExtResource("1_meshy")
+path = "res://assets/third_party/meshy/boathook/model/model.glb"
+fit_size = Vector3(2.0, 0.216, 0.061)
+stand_ins = [NodePath("../Shaft")]

@@ -16,6 +16,9 @@ const PARTS: Dictionary[String, Array] = {
 	"lamp_post.tscn": ["LanternHook", "LanternHook/Lantern"],
 	"mooring.tscn": ["ChainEye"],
 	"hydrangea_pots.tscn": [],
+	"rope_coil.tscn": [],
+	"oil_can.tscn": [],
+	"boathook.tscn": [],
 }
 
 
@@ -110,3 +113,38 @@ func test_the_cottage_windows_show_in_front_of_the_greybox_wall() -> void:
 			assert_bool(window.visible).is_true()
 			assert_float(window_front).override_failure_message(
 					"%s/%s is behind the wall" % [file, window_name]).is_greater(front)
+
+
+func test_the_loose_gear_shows_its_stand_ins_without_the_art() -> void:
+	for file: String in ["rope_coil.tscn", "oil_can.tscn", "boathook.tscn"]:
+		var prop: Node3D = _new_scene(HOME + file) as Node3D
+		var model: ThirdPartyModel = prop.get_node("Model") as ThirdPartyModel
+		model.path = ""  # no art, even on a machine that has it
+		assert_array(model.stand_ins).is_not_empty()
+		for stand_in: VisualInstance3D in model.stand_ins:
+			assert_bool(stand_in.visible).override_failure_message(
+					"%s: a stand-in is hidden with no art" % file).is_true()
+
+
+func test_the_boats_gear_lies_clear_of_the_rower_and_itself() -> void:
+	var boat: Node3D = _new_scene(BOAT) as Node3D
+	var rower: Node3D = boat.get_node("Rower") as Node3D
+	var seat: Array[AABB] = []
+	for part: String in ["Body", "Head"]:
+		var mesh: MeshInstance3D = rower.get_node(part) as MeshInstance3D
+		seat.append(rower.transform * mesh.transform * mesh.get_aabb())
+	var gear: Array[AABB] = []
+	for prop: Node3D in boat.get_node("Gear").get_children():
+		var model: ThirdPartyModel = prop.get_node("Model") as ThirdPartyModel
+		# The model sits on its origin, centred: a box of fit_size.
+		var box: AABB = AABB(Vector3(-model.fit_size.x / 2.0, 0.0, -model.fit_size.z / 2.0),
+				model.fit_size)
+		gear.append(prop.transform * box)
+	assert_int(gear.size()).is_equal(3)
+	for i: int in gear.size():
+		for sat_on: AABB in seat:
+			assert_bool(gear[i].intersects(sat_on)).override_failure_message(
+					"gear %d overlaps the rower" % i).is_false()
+		for j: int in range(i + 1, gear.size()):
+			assert_bool(gear[i].intersects(gear[j])).override_failure_message(
+					"gear %d overlaps gear %d" % [i, j]).is_false()

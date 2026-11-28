@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="1_meshy"]
+
+[sub_resource type="StandardMaterial3D" id="Rope"]
+albedo_color = Color(0.62, 0.5, 0.32, 1)
+metallic = 0
+roughness = 0.95
+
+[sub_resource type="CylinderMesh" id="Coil"]
+top_radius = 0.38
+bottom_radius = 0.38
+height = 0.2
+radial_segments = 12
+
+[node name="RopeCoil" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/rope_coil, drawn by the Model node: a coil of hemp rope with its loose end trailing out (fitted to 0.76 x 0.2 x 0.89 m, origin at the bottom). A dressing prop for the boat, jetty, deck and buoy. No attach points. The greybox disc shows when the art is missing."
+
+[node name="Coil" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.1, 0)
+material_override = SubResource("Rope")
+mesh = SubResource("Coil")
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+script = ExtResource("1_meshy")
+path = "res://assets/third_party/meshy/rope_coil/model/model.glb"
+fit_size = Vector3(0.76, 0.2, 0.89)
+stand_ins = [NodePath("../Coil")]
