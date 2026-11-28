@@ -4,12 +4,12 @@
 - Godot 4.7, GDScript only (no C#).
 - Use Godot 4 APIs only: CharacterBody3D, `await`, AnimatableBody3D. Never Godot 3 APIs (KinematicBody, `yield`).
 - Typed GDScript everywhere: type every variable, parameter and return value (enforced as errors; see Code style).
-- 3D, Forward+ renderer (switched from Compatibility in #61). Low-poly models with small low-resolution textures, softly filtered as the N64 did (bilinear on our greybox, the N64's three-point filter on fired pack models; #129), not crisp pixels, lit with modern lighting (N64/OoT style, high resolution).
+- 3D, Forward+ renderer (switched from Compatibility in #61). See `docs/look.md` for the painted environments and stylised character materials.
 - The 2D world layer (2D player, props, customers, tilemap) is legacy, being replaced by the 3D prototype in `scenes/prototype/`. Don't extend it.
 - Godot binary: `C:\Godot\godot_console.exe`
 
 ## The game
-A cosy 3D adventure in the spirit of Ocarina of Time. A lantern spirit rescues the player at sea and they join a ship's crew sailing between fog-wrapped islands, searching for a home they remember only as tastes and sounds. Ashore: exploring, gathering, puzzles and OoT-style duels against fog-touched creatures. Aboard: the ship is a safe hearth, and the galley, where you cook for the crew, is its heart. The hands-on cooking system carries over from the earlier restaurant design.
+A cosy 3D adventure in the spirit of Ocarina of Time. You are your island's chain-tender, with a lantern spirit for a friend. When the great chain that holds your island breaks, the sea sweeps you away into the Grave of the Lanterns and a ship finds you. Home hasn't gone anywhere you can't follow: like all the islands it has drifted off through the fog (you lose no memory), so you join a crew sailing between fog-wrapped islands to find it, guided by each island's cooking and songs and by the taste of your older sibling's fish stew. Ashore: exploring, gathering, puzzles and OoT-style duels against fog-touched creatures. Aboard: the ship is a safe hearth, and the galley, where you cook for the crew, is its heart. The hands-on cooking system carries over from the earlier restaurant design.
 
 Use greybox placeholder shapes until real art is added.
 
@@ -21,34 +21,35 @@ The full design lives in `docs/GDD.md`. Read it before starting a gameplay task,
 
 ## Public repo
 - This repo is public. Third-party art and audio go in `assets/third_party/`, which is gitignored: never commit anything from it, and never commit keys or tokens.
-- **The art is backed up in a private repo (#142).** `assets/third_party/` is its own git repo, a clone of the private `Adam-Higginson/restaurant-assets` (the packs, the Kiln output, Meshy models and ambient sounds, `.import` files included). Its `.gitattributes` turns off line-ending conversion so it's a byte-for-byte copy.
-  - **Back up** after adding a pack, firing the Kiln or making a Meshy model: in `assets/third_party/`, `git add -A`, commit with the issue in the message (`Adam-Higginson/salt-and-ember#<n>`), and push. Say when a task changed the art, so the user knows to back it up.
-  - **New PC or worktree:** `git clone https://github.com/Adam-Higginson/restaurant-assets.git assets/third_party`, then import (`godot_console.exe --headless --path . --import`). Clone, don't copy, so the copy is a working backup too.
+- **The art is backed up in a private repo (#142).** `assets/third_party/` is its own git repo, a clone of the private `Adam-Higginson/restaurant-assets` (the packs, Meshy models and ambient sounds, `.import` files included). Its `.gitattributes` turns off line-ending conversion so it's a byte-for-byte copy.
+  - **Back up** after adding a pack or making a Meshy model: in `assets/third_party/`, `git add -A`, commit with the issue in the message (`Adam-Higginson/salt-and-ember#<n>`), and push. Say when a task changed the art, so the user knows to back it up.
+  - **New PC or worktree, if the task needs the real art:** `git clone https://github.com/Adam-Higginson/restaurant-assets.git assets/third_party`, then import (`godot_console.exe --headless --path . --import`). Clone, don't copy, so the copy is a working backup too.
   - It stays private: it holds the raw packs, which we ship inside builds but don't re-host.
 - Our own placeholder art (generated, not third-party) lives in `assets/placeholder/` and is committed. Its cloth, paper and painted textures are painted soft by `tools/textures/paint_placeholders.sh` from the pixel-art originals in `tools/textures/originals/` (#135): change an original or a recipe and run it again; don't hand-edit the painted PNGs.
-- Pack models are fired into our N64 look by the Kiln (`./kiln.sh`, Blender 4.4; see `docs/GDD.md`). Its output goes in `assets/third_party/_kiln/` and is never committed: it's made from the packs. Check fired models by eye with `tools/kiln/capture.sh <folder>`.
 - Two exceptions are committed because the game needs them to look and sound the same for everyone, each with its licence file beside it: fonts under the SIL Open Font Licence in `assets/fonts/`, and CC0 sounds in `assets/audio/`. Anything else third-party still needs asking first.
 
 ## Meshy (3D models)
 - We have a paid Meshy subscription (about 1,100 credits a month, reset monthly) for generating crew and creature models. The Meshy CLI (`meshy`, npm `meshy-cli` 0.8) is installed and signed in, and the `meshy-3d-generation` skill drives it.
 - Credits are real money: before any paid step, say what it is and what it costs (a picture 9, an edit 12, a model 15, a rig 5, an animation 3), and wait for the user's go-ahead. Show the concept picture and get it approved before making the model.
 - Generated files go in `assets/third_party/meshy/<name>/`, gitignored: never commit them. The greybox stays as the fallback.
-- Meshy models are drawn as made, at full quality: `ThirdPartyModel` with `keep_as_made`, never fired in the Kiln.
+- `ThirdPartyModel` loads models directly from their imported files. Rigged characters can use a stylised material.
 - The recipe, the prompts that worked and the gotchas (scale the node, never `fit_size`; turn it 180 degrees) are in `docs/meshy.md`.
 
 ## Task tracking
 - The backlog is GitHub Project #1 owned by `Adam-Higginson` (kanban columns: Todo, In Progress, In Review, Done). Each task is an issue in `Adam-Higginson/salt-and-ember` added to the board.
+- Claude works on GitHub as `adam-higginson-claude`, a machine account with Write on this repo, `restaurant-assets` and the board. Its login and commit name come from the gitignored `.claude/settings.local.json` (an `env` block: `GH_CONFIG_DIR` for `gh`, `GIT_CONFIG_*` so git pushes use `gh auth git-credential`, and `GIT_AUTHOR_*`/`GIT_COMMITTER_*`), which `.worktreeinclude` copies into new worktrees. Before the first push in a session, check `gh api user --jq .login` says `adam-higginson-claude`; if not, stop and say so. Never print or handle its token.
+- Each task runs in its own git worktree on its own branch, usually as a separate Claude session the user can open and steer. The main chat coordinates from a clean `main` and doesn't do task coding in its own folder.
 - The user chooses which task to work on. If none was given, list the Todo items and ask.
 - **Plan and discuss before writing code.** For every task or other non-trivial change, first present a plan in chat and wait for the user's explicit approval before executing. The plan covers: the goal, the approach (with alternatives and a recommendation), the pieces/files involved, edge cases, the tests, what's out of scope, and any decisions the user needs to make (including project settings or plugins). Explain unfamiliar Godot concepts along the way. If the approach needs to change significantly during the task, stop and discuss before continuing. Small implementation details that don't change the approach can be decided as you go, but call them out in the summary.
 - Each task goes through a branch and a PR that the user reviews:
   1. Start from an up-to-date `main` and create a branch named `<issue-number>-<short-slug>`, e.g. `2-player-movement`. Move the card to In Progress.
   2. Commit on the branch as you go. Reference the issue number in commit messages, e.g. `Add customer spawning (#12)`.
-  3. When the task is working and the headless check passes, push the branch and open a PR into `main`. The PR body summarises the change, says how to test it in-game, and includes `Closes #<n>`.
-  4. Move the card to In Review, then stop and tell the user the PR is ready for review. Address review comments as new commits on the same branch.
-  5. **Only merge when the user explicitly tells you to.** Then:
+  3. When the task is working and the headless check passes, push the branch and open a PR into `main`. The PR body summarises the change, says how to test it in-game, and includes `Closes #<n>`. Request the user's review when opening it (`gh pr create --reviewer Adam-Higginson`, or `gh pr edit <n> --add-reviewer Adam-Higginson` if it's already open), so it shows in their GitHub review requests. Then ask Codex to review it by commenting from the user's own `gh` login, since Codex only takes requests from its linked account: `GH_CONFIG_DIR="$APPDATA/GitHub CLI" gh pr comment <n> --body "@codex review"`. Use that login for this one comment only, never to approve, merge or push.
+  4. Move the card to In Review, then stop and tell the user the PR is ready for review. The user reviews and **approves the PR in GitHub** from their own account. Address review comments as new commits on the same branch.
+  5. **Only merge after the user's approval in GitHub (or an explicit instruction).** `main` requires one approving review. Then:
      - Check CI is green, then merge with a merge commit: `gh pr merge <n> --merge`. Don't pass `--delete-branch` while another open PR is based on that branch, because deleting a PR's base branch closes the PR.
      - Confirm the issue closed and the card is in Done. The board normally does this; if it hasn't, close the issue or move the card yourself.
-     - Delete the merged branch (remote and local), switch to `main` and pull, and check CI passes on `main`.
+     - Delete the merged branch (remote and local) and the task's worktree (`git worktree remove`), switch to `main` and pull, and check CI passes on `main`.
      - Report back with what was merged and the board state.
 - Never commit directly to `main`: it is protected and only accepts PRs. This includes changes to `AGENTS.md`, `CLAUDE.md`, and docs, which go on a `docs/<slug>` branch.
 - Godot rewrites `project.godot` in its own format when the editor saves it. If it shows as modified with no real setting changes, commit it separately as a normalise commit.

@@ -1,0 +1,73 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://assets/placeholder/materials/greybox_dark_wood.tres" id="13_wood"]
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="14_meshy"]
+
+[sub_resource type="BoxMesh" id="Deck"]
+size = Vector3(3, 0.25, 11)
+
+[sub_resource type="CylinderMesh" id="Pile"]
+top_radius = 0.22
+bottom_radius = 0.24
+height = 4.0
+radial_segments = 8
+
+[node name="Jetty" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/jetty, drawn by the Model node (turned a quarter so its length runs along Z, sea end at -Z). Attach point: TieUp (the bollards at the sea end, where the boat ties up). The greybox shows when the art is missing."
+
+[node name="Deck" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.2, 0)
+material_override = ExtResource("13_wood")
+mesh = SubResource("Deck")
+
+[node name="PilePort1" type="MeshInstance3D" parent="."]
+position = Vector3(-1.4, -0.6, -5)
+material_override = ExtResource("13_wood")
+mesh = SubResource("Pile")
+
+[node name="PileStarboard1" type="MeshInstance3D" parent="."]
+position = Vector3(1.4, -0.6, -5)
+material_override = ExtResource("13_wood")
+mesh = SubResource("Pile")
+
+[node name="PilePort2" type="MeshInstance3D" parent="."]
+position = Vector3(-1.4, -0.6, -1.5)
+material_override = ExtResource("13_wood")
+mesh = SubResource("Pile")
+
+[node name="PileStarboard2" type="MeshInstance3D" parent="."]
+position = Vector3(1.4, -0.6, -1.5)
+material_override = ExtResource("13_wood")
+mesh = SubResource("Pile")
+
+[node name="PilePort3" type="MeshInstance3D" parent="."]
+position = Vector3(-1.4, -0.6, 2)
+material_override = ExtResource("13_wood")
+mesh = SubResource("Pile")
+
+[node name="PileStarboard3" type="MeshInstance3D" parent="."]
+position = Vector3(1.4, -0.6, 2)
+material_override = ExtResource("13_wood")
+mesh = SubResource("Pile")
+
+[node name="PilePort4" type="MeshInstance3D" parent="."]
+position = Vector3(-1.4, -0.6, 5.5)
+material_override = ExtResource("13_wood")
+mesh = SubResource("Pile")
+
+[node name="PileStarboard4" type="MeshInstance3D" parent="."]
+position = Vector3(1.4, -0.6, 5.5)
+material_override = ExtResource("13_wood")
+mesh = SubResource("Pile")
+
+[node name="TieUp" type="Marker3D" parent="."]
+position = Vector3(0, 1.7, -5.0)
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+position = Vector3(0, -3.3, 0)
+rotation = Vector3(0, 1.5708, 0)
+script = ExtResource("14_meshy")
+path = "res://assets/third_party/meshy/jetty/model/model.glb"
+fit_size = Vector3(11, 5, 3)
+stretch = true
+stand_ins = [NodePath("../Deck"), NodePath("../PilePort1"), NodePath("../PileStarboard1"), NodePath("../PilePort2"), NodePath("../PileStarboard2"), NodePath("../PilePort3"), NodePath("../PileStarboard3"), NodePath("../PilePort4"), NodePath("../PileStarboard4")]

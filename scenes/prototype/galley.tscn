@@ -47,6 +47,30 @@
 [ext_resource type="PackedScene" path="res://scenes/prototype/props/treasure_chest.tscn" id="320_chest"]
 [ext_resource type="Resource" path="res://data/tools/chefs_knife.tres" id="321_knife"]
 
+[ext_resource type="PackedScene" path="res://scenes/prototype/props/old_book.tscn" id="GalleyCookbook"]
+
+[ext_resource type="Script" path="res://scripts/props/slops_bucket.gd" id="SlopsScript"]
+[ext_resource type="Script" path="res://scripts/interaction/interactable_3d.gd" id="SlopsReach"]
+[ext_resource type="Material" path="res://assets/placeholder/materials/dark_prop_wood.tres" id="SlopsWood"]
+
+[ext_resource type="Script" path="res://scripts/props/inspectable.gd" id="JugInspect"]
+[ext_resource type="PackedScene" path="res://scenes/prototype/dressing/green_bottle.tscn" id="WaterJug"]
+
+[sub_resource type="BoxShape3D" id="JugReach"]
+size = Vector3(0.48, 0.8, 0.45)
+
+[sub_resource type="BoxMesh" id="CookbookStandMesh"]
+size = Vector3(0.94, 1, 0.45)
+
+[sub_resource type="CylinderMesh" id="SlopsMesh"]
+top_radius = 0.25
+bottom_radius = 0.19
+height = 0.34
+cap_top = false
+
+[sub_resource type="BoxShape3D" id="SlopsArea"]
+size = Vector3(0.6, 0.7, 0.6)
+
 [sub_resource type="BoxMesh" id="Cosy_1"]
 size = Vector3(9.1, 0.1, 6.65)
 
@@ -634,6 +658,44 @@ ambient_mode = 2
 ambient_color = Color(0.32, 0.2, 0.13, 1)
 ambient_color_energy = 0.35
 
+[node name="SlopsBucket" type="Node3D" parent="."]
+position = Vector3(-2.65, 1.2, 2.2)
+script = ExtResource("SlopsScript")
+
+[node name="Bucket" type="MeshInstance3D" parent="SlopsBucket"]
+mesh = SubResource("SlopsMesh")
+material_override = ExtResource("SlopsWood")
+
+[node name="Reach" type="Area3D" parent="SlopsBucket"]
+script = ExtResource("SlopsReach")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SlopsBucket/Reach"]
+shape = SubResource("SlopsArea")
+
+[node name="CookbookStand" type="MeshInstance3D" parent="."]
+position = Vector3(4.76, 1.45, 1.45)
+mesh = SubResource("CookbookStandMesh")
+material_override = ExtResource("SlopsWood")
+
+[node name="WaterJug" type="Node3D" parent="."]
+position = Vector3(5.02, 1.96, 1.46)
+script = ExtResource("JugInspect")
+what = "the empty bottle"
+lines = &"water_jug"
+
+[node name="Bottle" parent="WaterJug" instance=ExtResource("WaterJug")]
+scale = Vector3(0.8, 0.8, 0.8)
+
+[node name="Reach" type="Area3D" parent="WaterJug"]
+position = Vector3(0.14, -0.28, 0.04)
+script = ExtResource("SlopsReach")
+
+[node name="Shape" type="CollisionShape3D" parent="WaterJug/Reach"]
+shape = SubResource("JugReach")
+
+[node name="OldCookbook" parent="." instance=ExtResource("GalleyCookbook")]
+position = Vector3(4.55, 1.95, 1.45)
+
 [node name="Pantry" parent="." unique_id=1036573145 instance=ExtResource("7_pantry")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.65, 1, 1.45)
 
@@ -818,9 +880,6 @@ script = ExtResource("196_meshy")
 path = "res://assets/third_party/meshy/crock_shelf/model/model.glb"
 fit_size = Vector3(1.2, 0.9, 0.45)
 stand_ins = [NodePath("../CrockShelf"), NodePath("../CrockShelfBracket1"), NodePath("../CrockShelfBracket2"), NodePath("../Crock1"), NodePath("../Crock1Lid"), NodePath("../Crock2"), NodePath("../Crock2Lid"), NodePath("../Crock3"), NodePath("../Crock3Lid"), NodePath("../LowerShelf"), NodePath("../LowCrock1"), NodePath("../LowCrock2")]
-grain = false
-detail = 1.0
-keep_as_made = true
 
 [node name="SupperTable" parent="." instance=ExtResource("207_supper")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1.82, 5.3)
@@ -831,9 +890,6 @@ script = ExtResource("196_meshy")
 path = "res://assets/third_party/meshy/kitchen_knife/model/model.glb"
 fit_size = Vector3(0.42, 10, 10)
 stand_ins = [NodePath("../Knife1"), NodePath("../KnifeHandle1")]
-grain = false
-detail = 1.0
-keep_as_made = true
 
 [node name="KnifeMeshy2" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.62, 2.37, 1.25)
@@ -841,9 +897,6 @@ script = ExtResource("196_meshy")
 path = "res://assets/third_party/meshy/kitchen_knife/model/model.glb"
 fit_size = Vector3(0.42, 10, 10)
 stand_ins = [NodePath("../Knife2"), NodePath("../KnifeHandle2")]
-grain = false
-detail = 1.0
-keep_as_made = true
 
 [node name="KnifeMeshy3" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.8, 2.37, 1.25)
@@ -851,9 +904,6 @@ script = ExtResource("196_meshy")
 path = "res://assets/third_party/meshy/kitchen_knife/model/model.glb"
 fit_size = Vector3(0.42, 10, 10)
 stand_ins = [NodePath("../Knife3"), NodePath("../KnifeHandle3")]
-grain = false
-detail = 1.0
-keep_as_made = true
 
 [node name="PanMeshy" type="Node3D" parent="PanHook" node_paths=PackedStringArray("stand_ins")]
 transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0.05, -0.5, 0)
@@ -861,6 +911,3 @@ script = ExtResource("196_meshy")
 path = "res://assets/third_party/meshy/frying_pan/model/model.glb"
 fit_size = Vector3(10, 10, 0.3)
 stand_ins = [NodePath("../Pan")]
-grain = false
-detail = 1.0
-keep_as_made = true

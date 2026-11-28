@@ -8,8 +8,12 @@ assets/third_party/
 reports/
 addons/gdUnit4/GdUnitRunner.cfg
 
-# Python caches (tools/kiln, run by Blender)
+# Python caches
 __pycache__/
 
 # Exported builds (tools/build/export.sh)
 /builds/
+
+# Claude Code: worktrees and personal settings stay local
+.claude/worktrees/
+.claude/settings.local.json

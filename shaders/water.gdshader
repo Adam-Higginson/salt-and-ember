@@ -64,6 +64,66 @@ uniform float grave_energy = 0.45;
 // What share of the places one could be actually has a light.
 uniform float grave_share : hint_range(0.0, 1.0) = 0.06;
 
+// --- Dusk (home waters) ---------------------------------------------------
+// Everything below defaults to "off", so the night sea (the Grave, the ship's
+// sea) looks exactly as before. Home waters' own material turns it on.
+// How much the surface mirrors the dusk sky below instead of the flat
+// [sky_reflection] colour: 0 is the night sea, 1 the dusk sky.
+uniform float reflect_sky : hint_range(0.0, 1.0) = 0.0;
+// The dusk sky as the water sees it: the horizon, the rosy middle, overhead.
+// Match these to the sky shader's colours.
+uniform vec4 sky_horizon : source_color = vec4(1.0, 0.42, 0.16, 1.0);
+uniform vec4 sky_mid : source_color = vec4(0.66, 0.34, 0.55, 1.0);
+uniform vec4 sky_zenith : source_color = vec4(0.1, 0.07, 0.27, 1.0);
+// The direction towards the sun (world space) and its colour. Match the Sun
+// node's direction (the sky shader reads the light itself; a surface
+// shader can't, so it's set here).
+uniform vec3 sky_sun_direction = vec3(-0.37, 0.055, -0.93);
+uniform vec4 sky_sun_color : source_color = vec4(1.0, 0.66, 0.34, 1.0);
+// How sharply the water turns reflective at a glancing angle (the Fresnel
+// power: smaller reflects more, from nearer).
+uniform float fresnel_power : hint_range(1.0, 8.0) = 4.0;
+// Broken painted streaks of sunlight on the swell, towards the sun: how
+// strong (0 is none), how wide the streak is, and its colour. Pinned to the
+// world, so it doesn't swim as the camera moves.
+uniform float glitter : hint_range(0.0, 8.0) = 0.0;
+uniform float glitter_width : hint_range(0.0, 1.0) = 0.5;
+uniform vec4 glitter_color : source_color = vec4(1.0, 0.78, 0.5, 1.0);
+// Far water melts into [far_color] between [far_start] and [far_end] metres
+// from the camera, as much as [far_blend] (0 is none).
+uniform float far_blend : hint_range(0.0, 1.0) = 0.0;
+uniform vec4 far_color : source_color = vec4(0.5, 0.34, 0.52, 1.0);
+uniform float far_start = 40.0;
+uniform float far_end = 260.0;
+// 0 is soft foam; towards 1 it's cut into crisp painted shapes.
+uniform float foam_crisp : hint_range(0.0, 1.0) = 0.0;
+// Painted wave shapes: a few short peaked waves (a few metres long) worked
+// into the surface's slope per pixel, on top of the swell that moves the
+// mesh. How strong (0 is none), the longest one's length in metres, and how
+// fast they run.
+uniform float paint_waves : hint_range(0.0, 2.0) = 0.0;
+uniform float paint_wave_length : hint_range(1.0, 40.0) = 7.0;
+uniform float paint_wave_speed : hint_range(0.0, 3.0) = 1.0;
+// Cuts the mirrored sky into this many flat steps of brightness, so wave
+// faces read as painted strokes (0 is smooth, off).
+uniform float reflection_bands : hint_range(0.0, 8.0) = 0.0;
+// The least share of the sky the water mirrors, even looking straight
+// down, so near wave faces still catch the sky (0 is physical, the night sea).
+uniform float reflection_floor : hint_range(0.0, 1.0) = 0.0;
+// The long column of sun on the water: its strength (0 is none) and how wide
+// it is (as a sideways angle from the camera).
+uniform float sun_path : hint_range(0.0, 4.0) = 0.0;
+uniform float sun_path_width : hint_range(0.005, 0.3) = 0.06;
+// Painted clouds in the mirrored sky (the sky's own clouds can't be read by
+// a surface shader): how much, how big, and their lit and shaded colours.
+uniform float sky_clouds : hint_range(0.0, 1.0) = 0.0;
+uniform float sky_cloud_scale : hint_range(0.05, 4.0) = 0.6;
+uniform vec4 sky_cloud_lit : source_color = vec4(0.95, 0.5, 0.33, 1.0);
+uniform vec4 sky_cloud_shade : source_color = vec4(0.4, 0.27, 0.5, 1.0);
+// The engine's own specular reflection (sun highlight and the blurred sky
+// cube map). 0.5 is Godot's default.
+uniform float sky_specular : hint_range(0.0, 1.0) = 0.5;
+
 varying vec3 v_world;
 varying vec3 v_normal;
 varying float v_height;
@@ -200,6 +260,45 @@ float grave_lights(vec3 world, vec3 eye, float time) {
 	return lit;
 }
 
+// The dusk sky in direction [r] (world space, unit): the same gradient and
+// sun glow as shaders/painted_sky.gdshader, with painted stand-in clouds
+// (coral towards the sun, violet away) when [sky_clouds] is on.
+vec3 dusk_sky(vec3 r) {
+	float h = clamp(r.y, 0.0, 1.0);
+	vec3 c = mix(sky_horizon.rgb, sky_mid.rgb, smoothstep(0.0, 0.12, h));
+	c = mix(c, sky_zenith.rgb, smoothstep(0.1, 0.7, h));
+	float toward = max(dot(r, normalize(sky_sun_direction)), 0.0);
+	c += sky_sun_color.rgb * (pow(toward, 24.0) * 0.35 + pow(toward, 120.0) * 1.0);
+	if (sky_clouds > 0.0) {
+		vec2 plane = r.xz / (h + 0.25) * sky_cloud_scale;
+		float blob = texture(foam_noise, plane * 0.15 + vec2(0.3, 0.1)).r * 0.65
+				+ texture(foam_noise, plane * 0.4).r * 0.35;
+		float cloud = smoothstep(0.5, 0.6, blob) * smoothstep(0.0, 0.08, h);
+		vec3 cloud_col = mix(sky_cloud_shade.rgb, sky_cloud_lit.rgb, smoothstep(0.3, 0.9, toward));
+		c = mix(c, cloud_col, cloud * sky_clouds);
+	}
+	return c;
+}
+
+// The slope (x, z) of the painted waves at [p]: five short waves with peaked
+// crests (exp(sin) makes the crest narrow and the trough broad), their
+// positions bent by [warp] so the shapes look drawn rather than ruled.
+vec2 painted_wave_slope(vec2 p, vec2 warp, float time) {
+	vec2 slope = vec2(0.0);
+	float angles[5] = {0.15, -0.3, 0.5, -0.65, 0.02};
+	float lengths[5] = {1.0, 0.63, 0.42, 0.31, 0.21};
+	float steep[5] = {0.4, 0.3, 0.22, 0.16, 0.1};
+	for (int i = 0; i < 5; i++) {
+		vec2 dir = vec2(sin(angles[i]), -cos(angles[i]));
+		float k = 6.2832 / (paint_wave_length * lengths[i]);
+		float phase = k * dot(dir, p + warp * (1.0 + float(i) * 0.4))
+				- sqrt(9.8 * k) * time * paint_wave_speed;
+		float peak = exp(sin(phase) - 1.0);
+		slope += dir * steep[i] * peak * cos(phase);
+	}
+	return slope;
+}
+
 void fragment() {
 	float hull_d = hull_distance(v_world);
 	// The hull hides the water inside it; cut it out so it can't show
@@ -215,6 +314,12 @@ void fragment() {
 	vec2 detail = (na.xy + nb.xy) * detail_strength;
 	vec2 rings = rain_slope(v_world.xz, TIME) * rain;
 	vec3 n = normalize(v_normal + vec3(detail.x + rings.x, 0.0, detail.y + rings.y));
+	if (paint_waves > 0.0) {
+		vec2 warp = vec2(texture(foam_noise, v_world.xz * 0.02).r,
+				texture(foam_noise, v_world.xz * 0.02 + 0.5).r) * 1.5;
+		vec2 waves = painted_wave_slope(v_world.xz, warp, TIME);
+		n = normalize(n - vec3(waves.x, 0.0, waves.y) * paint_waves);
+	}
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
 
 	// Light glows through the wave where the surface is high and thin.
@@ -257,6 +362,8 @@ void fragment() {
 		foam = max(foam, wake_foam);
 		stirred = max(stirred, across * (1.0 - age) * wake * from_stern);
 	}
+	// Painted foam: the soft edge is cut to a narrow one.
+	foam = mix(foam, smoothstep(0.42, 0.5, foam), foam_crisp);
 	// Where the water's been stirred, tiny specks glint and fade.
 	float specks = texture(foam_noise, v_world.xz * 1.3 + vec2(TIME * 0.11, -TIME * 0.07)).r;
 	float twinkle = smoothstep(0.7, 0.78, specks) * (0.6 + 0.4 * sin(TIME * 3.0 + specks * 40.0));
@@ -269,11 +376,68 @@ void fragment() {
 	// Water mirrors the sky at a glancing angle and looks dark head-on. The
 	// night sky is nearly black, so the misty sky colour is added by hand,
 	// which is what lets the swell's shape read against the fog.
-	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
-	vec3 sky = sky_reflection.rgb * fresnel * (1.0 - foam);
+	float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), fresnel_power);
+	fresnel = mix(reflection_floor, 1.0, fresnel);
+	if (reflection_bands > 0.0) {
+		// Painted: a few flat steps, each edge softened a touch.
+		float x = fresnel * reflection_bands;
+		fresnel = (floor(x) + smoothstep(0.35, 0.65, fract(x))) / reflection_bands;
+	}
+	vec3 to_surface = normalize(v_world - CAMERA_POSITION_WORLD);
+	vec3 mirrored = reflect(to_surface, n);
+	mirrored.y = abs(mirrored.y);
+	vec3 sky_colour = mix(sky_reflection.rgb, dusk_sky(mirrored), reflect_sky);
+	vec3 sky = sky_colour * fresnel * (1.0 - foam);
 	EMISSION = sky + crest_color.rgb * glow * night_glow
 			+ foam_color.rgb * foam * night_glow * 0.35
 			+ glimmer_color.rgb * glints * glimmer;
+	// Before the sun's light, so the sun path still reaches the horizon.
+	if (far_blend > 0.0) {
+		float far = smoothstep(far_start, far_end, length(v_world - CAMERA_POSITION_WORLD)) * far_blend;
+		ALBEDO = mix(ALBEDO, far_color.rgb, far);
+		EMISSION = mix(EMISSION, far_color.rgb * 0.7, far);
+	}
+	vec3 sun_dir = normalize(sky_sun_direction);
+	vec2 sun_flat = normalize(sun_dir.xz + vec2(0.0001));
+	if (glitter > 0.0) {
+		// The sun's glints. Each wave face is a little mirror; it flashes
+		// when it throws the view towards the sun. The test is stretched
+		// (anisotropic): tight sideways (the bearing must match the sun's),
+		// loose up and down (any tilt along the line to the sun will do),
+		// which draws the glitter out into a long column under a low sun.
+		vec2 bounce_flat = normalize(mirrored.xz + vec2(0.0001));
+		float sideways = abs(bounce_flat.x * sun_flat.y - bounce_flat.y * sun_flat.x);
+		float facing = step(0.0, dot(bounce_flat, sun_flat));
+		float upright = abs(mirrored.y - sun_dir.y);
+		float side_tol = 0.03 + 0.12 * glitter_width;
+		float streak = (1.0 - smoothstep(side_tol * 0.3, side_tol, sideways))
+				* (1.0 - smoothstep(0.06, 0.3, upright)) * facing;
+		float dashes = texture(foam_noise, v_world.xz * vec2(0.7, 0.22) + vec2(TIME * 0.02, 0.0)).r;
+		float broken = smoothstep(0.4, 0.52, dashes + detail.x * 0.4);
+		// Painted: two flat steps, not a smooth falloff.
+		float steps = floor(streak * 3.0) / 3.0 + step(0.66, streak) * 0.34;
+		EMISSION += glitter_color.rgb * glitter * steps * broken * (1.0 - foam);
+	}
+	if (sun_path > 0.0) {
+		// A softer sheen along the same column, so the dashes sit in a glow.
+		// Measured from the camera's bearing to this spot, so it lies under
+		// the sun whichever way the camera turns; the wave faces tilted
+		// towards the sun catch more of it.
+		vec2 look_flat = normalize(to_surface.xz + vec2(0.0001));
+		float off = abs(look_flat.x * sun_flat.y - look_flat.y * sun_flat.x);
+		float ahead = step(0.0, dot(look_flat, sun_flat));
+		float column = exp(-pow(off / sun_path_width, 2.0)) * ahead;
+		// Painted: the faces turned to the sun take it in two flat steps.
+		// Far off the faces are too small to see apart, so the path there is
+		// solid, and brighter, as a real one is towards the horizon.
+		float dist = length(v_world - CAMERA_POSITION_WORLD);
+		float far_path = smoothstep(30.0, 300.0, dist);
+		float face = clamp(dot(n.xz, sun_flat) * 5.0 + 0.3, 0.0, 1.0);
+		face = smoothstep(0.25, 0.35, face) * 0.4 + smoothstep(0.65, 0.75, face) * 0.6;
+		face = mix(face, 1.0, far_path * 0.7);
+		column *= 0.6 + far_path * 0.8;
+		EMISSION += glitter_color.rgb * sun_path * column * (0.1 + 0.9 * face) * (1.0 - foam);
+	}
 	if (grave > 0.0) {
 		// Seen through the water, so foam and the mirrored sky hide them.
 		EMISSION += grave_color.rgb * grave_lights(v_world, CAMERA_POSITION_WORLD, TIME)
@@ -281,5 +445,5 @@ void fragment() {
 	}
 	ROUGHNESS = mix(roughness_water, 0.85, foam);
 	METALLIC = 0.0;
-	SPECULAR = 0.5;
+	SPECULAR = sky_specular;
 }

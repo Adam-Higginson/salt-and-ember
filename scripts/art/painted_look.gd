@@ -8,9 +8,7 @@ extends Node
 ##   (shaders/painted_filter.gdshader), on whichever camera is in use;
 ## - draws rigged Meshy characters with the stylised look, so they keep a
 ##   fine brush and crisp faces, and no one light burns them out;
-## - takes the N64 look off: every pack model is drawn as it was made (not
-##   the Kiln's crunched copy, and with no grain), and the ship's planking
-##   loses its small blurred wood-grain picture, leaving clean painted planks.
+## - gives the ship clean painted planks.
 ## F7 switches it on and off while the game runs (debug builds only), to
 ## compare (F8 is taken: it replays a cutscene's section). It leaves the scene's own time of day, weather and fog alone.
 
@@ -35,6 +33,10 @@ const SURFACE: Dictionary[StringName, Variant] = {
 ## The scene's environment. Left empty, the first WorldEnvironment in the
 ## scene is used.
 @export var world: WorldEnvironment
+## On: the scene's own Environment keeps its tone mapping, saturation and
+## glow (it already grades itself, like home waters' dusk), so the look
+## doesn't grade twice. [member saturation] then does nothing.
+@export var keep_scene_grade: bool = false
 @export_group("Picture")
 ## How much richer colours are than the scene's own grade.
 @export_range(0.5, 2.0) var saturation: float = 1.12
@@ -106,21 +108,8 @@ var _shell_style: CharacterStyle
 var _viewport_was: Dictionary[StringName, Variant] = {}
 var _was: Dictionary[StringName, Variant] = {}
 var _styled: Array[ThirdPartyModel] = []
-# Each pack model's own [keep_as_made, grain, detail], to put back.
-var _models_were: Dictionary[ThirdPartyModel, Array] = {}
-# Each pack character's own [use_kiln, n64, detail], to put back.
-var _people_were: Dictionary[CharacterModel, Array] = {}
 # Each planked material's own settings, to put back.
 var _surfaces_were: Dictionary[ShaderMaterial, Dictionary] = {}
-
-
-func _enter_tree() -> void:
-	# Before anything in the scene is dressed: nothing uses a Kiln copy.
-	KilnJob.use_fired = not enabled
-
-
-func _exit_tree() -> void:
-	KilnJob.use_fired = true
 
 
 func _ready() -> void:
@@ -143,6 +132,17 @@ func _ready() -> void:
 			world = found[0] as WorldEnvironment
 	get_tree().node_added.connect(_on_node_added)
 	_apply()
+
+
+func _exit_tree() -> void:
+	# The filter hangs off a camera; if it was never hung on one (no camera
+	# yet) nothing else owns it, so free it here.
+	if _filter != null and is_instance_valid(_filter):
+		if _filter.get_parent() == null:
+			_filter.free()
+		else:
+			_filter.queue_free()
+	_filter = null
 
 
 func _process(_delta: float) -> void:
@@ -189,10 +189,8 @@ static func make_filter(compare: String, brush_size: float) -> MeshInstance3D:
 
 
 func _apply() -> void:
-	KilnJob.use_fired = not enabled
 	_apply_sharpness()
 	_apply_environment()
-	_apply_people()
 	if enabled and _filter == null:
 		_filter = make_filter("compare_not_equal", brush)
 		_filter.add_child(make_filter("compare_equal", character_brush))
@@ -232,13 +230,6 @@ func _apply() -> void:
 			if is_instance_valid(model):
 				model.style = null
 		_styled.clear()
-		for model: ThirdPartyModel in _models_were:
-			if is_instance_valid(model):
-				model.keep_as_made = _models_were[model][0]
-				model.grain = _models_were[model][1]
-				model.detail = _models_were[model][2]
-				model.dress()
-		_models_were.clear()
 
 
 # Every texture in the picture is drawn from a finer copy, with the sharpest
@@ -258,29 +249,6 @@ func _apply_sharpness() -> void:
 		if not _viewport_was.has(property):
 			_viewport_was[property] = viewport.get(property)
 		viewport.set(property, sharper[property])
-
-
-# Pack characters (the player) are built from the packs' own parts at full
-# quality, with their own smooth textures: no Kiln copies, no N64 filtering.
-func _apply_people() -> void:
-	if not enabled:
-		for person: CharacterModel in _people_were:
-			if is_instance_valid(person):
-				person.use_kiln = _people_were[person][0]
-				person.n64 = _people_were[person][1]
-				person.detail = _people_were[person][2]
-				person.dress()
-		_people_were.clear()
-		return
-	for found: Node in get_tree().root.find_children("*", "CharacterModel", true, false):
-		var person: CharacterModel = found as CharacterModel
-		if _people_were.has(person):
-			continue
-		_people_were[person] = [person.use_kiln, person.n64, person.detail]
-		person.use_kiln = false
-		person.n64 = false
-		person.detail = 1.0
-		person.dress()
 
 
 # Planked surfaces (the wet_surface shader) lose their blurred grain picture
@@ -329,17 +297,20 @@ func _apply_environment() -> void:
 			env.set(property, _was[property])
 		_was.clear()
 		return
-	# Filmic keeps bright colours saturated; AgX fades them towards white.
-	_override(env, &"tonemap_mode", Environment.TONE_MAPPER_FILMIC)
-	_override(env, &"tonemap_white", 5.0)
-	_override(env, &"adjustment_enabled", true)
-	_override(env, &"adjustment_saturation", env.adjustment_saturation * saturation)
+	if not keep_scene_grade:
+		# Filmic keeps bright colours saturated; AgX fades them towards white.
+		_override(env, &"tonemap_mode", Environment.TONE_MAPPER_FILMIC)
+		_override(env, &"tonemap_white", 5.0)
+		_override(env, &"adjustment_enabled", true)
+		_override(env, &"adjustment_saturation", env.adjustment_saturation * saturation)
 	# Light bounces between nearby surfaces: lantern light warms the wood
 	# around it. (SDFGI would do more, but it can't follow a moving ship.)
 	_override(env, &"ssil_enabled", true)
 	_override(env, &"ssil_radius", 2.5)
 	_override(env, &"ssil_intensity", 1.2)
 	_override(env, &"ssao_light_affect", 0.0)
+	if keep_scene_grade:
+		return
 	# Only lamps and flames bloom, not every pale thing a lamp shines on.
 	_override(env, &"glow_bloom", 0.02)
 	_override(env, &"glow_intensity", 0.7)
@@ -358,13 +329,6 @@ func _on_node_added(node: Node) -> void:
 	if model == null or not enabled or _styled.has(model):
 		return
 	_styled.append(model)
-	if not model.keep_as_made or model.grain or model.detail < 1.0:
-		_models_were[model] = [model.keep_as_made, model.grain, model.detail]
-		model.keep_as_made = true
-		model.grain = false
-		model.detail = 1.0
-		if model.is_inside_tree() and model.model != null:
-			model.dress()
 	if not model.dressed.is_connected(_on_dressed):
 		model.dressed.connect(_on_dressed.bind(model))
 	_on_dressed.call_deferred(model.model != null, model)
