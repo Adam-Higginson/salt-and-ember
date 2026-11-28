@@ -365,18 +365,18 @@ void fragment() {
 	float noise = texture(foam_noise, v_world.xz * 0.08 + vec2(0.0, TIME * 0.03)).r;
 	float foam = smoothstep(crest_foam_from, 1.0, v_crest + noise * 0.25);
 	if (crest_paint > 0.0) {
-		// Painted caps instead: where the crest is pointed enough, broken by
-		// two scales of noise stretched along the crest so the cap reads as
-		// a few brush strokes, not a ruled line, with a fainter second tone
-		// just below it for a painted edge.
+		// Painted caps instead: only at the tips, where the crest is pointed
+		// enough, and there broken into a few brush strokes (a noise
+		// stretched along the crest), so the cap reads as strokes of paint,
+		// not a ruled line or a speckled field.
 		vec2 along = vec2(v_wave_dir.y, -v_wave_dir.x);
 		vec2 brush_uv = vec2(dot(v_world.xz, along) * 0.3, dot(v_world.xz, v_wave_dir) * 0.8);
-		float brush = texture(foam_noise, brush_uv + vec2(TIME * 0.01, 0.0)).r * 0.65
-				+ texture(foam_noise, brush_uv * 3.1 + 0.37).r * 0.35;
-		float cap = v_crest + (brush - 0.5) * 0.7;
-		foam = smoothstep(crest_foam_from, crest_foam_from + crest_softness, cap);
-		foam = max(foam, smoothstep(crest_foam_from - 0.07,
-				crest_foam_from - 0.07 + crest_softness, cap) * 0.3);
+		float brush = texture(foam_noise, brush_uv + vec2(TIME * 0.01, 0.0)).r;
+		float fine = texture(foam_noise, brush_uv * 3.1 + 0.37).r;
+		float tip = smoothstep(crest_foam_from, crest_foam_from + crest_softness,
+				v_crest + (brush - 0.5) * 0.2);
+		float strokes = smoothstep(0.6, 0.7, brush * 0.6 + fine * 0.4);
+		foam = tip * strokes;
 		foam *= crest_paint;
 	}
 	vec2 local = (hull_inverse * vec4(v_world, 1.0)).xz;

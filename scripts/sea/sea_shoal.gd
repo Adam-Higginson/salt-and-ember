@@ -65,7 +65,9 @@ func _ready() -> void:
 	_random.seed = shoal_seed
 	for anchor: Node3D in anchors:
 		# The same anchor can hold several shoals; it's heard once.
-		if anchor != null and anchor.has_signal(&"stroked") 				and not anchor.is_connected(&"stroked", _on_stroked.bind(anchor)):
+		if anchor == null or not anchor.has_signal(&"stroked"):
+			continue
+		if not anchor.is_connected(&"stroked", _on_stroked.bind(anchor)):
 			anchor.connect(&"stroked", _on_stroked.bind(anchor))
 	for shoal: int in shoals:
 		var home: Vector3 = _anchor_spot(shoal)

@@ -24,7 +24,7 @@ uniform vec2 centre = vec2(0.0);
 uniform float radius = 10.0;
 // How pointed a crest must be before spray comes off it (0 to 1, the same
 // scale as the water's crest foam).
-uniform float crest_from = 0.42;
+uniform float crest_from = 0.3;
 // Up to eight posts standing in the water (the jetty's piles): x, z, radius.
 uniform int post_count = 0;
 uniform vec3 posts[8];
@@ -34,14 +34,14 @@ uniform float post_share : hint_range(0.0, 1.0) = 0.3;
 uniform float post_from = 0.15;
 // How often the bursts move on, and how many slots there are.
 uniform float burst_seconds = 0.35;
-uniform int bursts = 6;
+uniform int bursts = 12;
 // How fast droplets lift and are blown along, in metres a second, and how
 // hard they fall.
 uniform float lift = 3.2;
 uniform float blow = 2.0;
 uniform float gravity = 6.0;
 // How big a droplet is, smallest to biggest, in metres.
-uniform vec2 sizes = vec2(0.18, 0.45);
+uniform vec2 sizes = vec2(0.2, 0.5);
 
 float hash(uint n) {
 	n = (n << 13u) ^ n;
