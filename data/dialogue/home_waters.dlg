@@ -15,6 +15,15 @@
 #   too_far       you've rowed off into the fog (said again, in turn, if you
 #                 stay out there)
 #
+# Tending the buoy (#228; scripts/intro/buoy_tending.gd):
+#   tied_up       you've tied up and are about to climb
+#   on_platform   you're up on the buoy
+#   hand_on_chain you've put a hand on the chain
+#   lamp_gift     he's giving the lamp a little of his flame
+#   lamp_lit      the lamp's lit
+#   not_yet       you tried the ladder before the chain and the lamp were done
+#   supper        you're back in the boat
+#
 # First drafts: rewrite freely.
 
 ~ left_jetty [on left_jetty]
@@ -47,3 +56,27 @@ lantern: Wrong way, chain-tender. The buoy's back there.
 
 ~ too_far_2 [on too_far]
 lantern: There's nothing out here but fog. Turn us round?
+
+~ tied_up [on tied_up]
+lantern: Rope's on. Up you go. I'll float.
+
+~ on_platform [on on_platform]
+lantern: Still smells of rust and seaweed. Lovely.
+lantern: Chain first, then the lamp. Same as always.
+
+~ hand_on_chain [on hand_on_chain]
+lantern: There. Feel it? Slow and steady.
+lantern: Hundred years of that, and it's never skipped a beat.
+
+~ lamp_gift [on lamp_gift]
+lantern: Just a little. Doesn't hurt.
+
+~ lamp_lit [on lamp_lit]
+lantern: There she is. Look at her.
+lantern: I'm a bit dimmer, that's all. Nothing a bowl of stew won't fix.
+
+~ not_yet [on not_yet]
+lantern: Not yet, chain-tender. Chain and lamp first.
+
+~ supper [on supper]
+lantern: Supper, then.

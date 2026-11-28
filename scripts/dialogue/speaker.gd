@@ -65,10 +65,13 @@ var _ticks_to_look: int = 0
 class Queued:
 	var words: String
 	var style: SpeechBubble.Style
+	## Asked just before the line would show: false drops it unsaid.
+	var still_wanted: Callable
 
-	func _init(line: String, how: SpeechBubble.Style) -> void:
+	func _init(line: String, how: SpeechBubble.Style, wanted: Callable) -> void:
 		words = line
 		style = how
+		still_wanted = wanted
 
 
 func _init() -> void:
@@ -97,11 +100,14 @@ func _physics_process(_delta: float) -> void:
 
 
 ## Says [param words] in a bubble of [param style], after anything they're
-## already saying.
-func say(words: String, style: SpeechBubble.Style = SpeechBubble.Style.SPEECH) -> void:
+## already saying. If [param still_wanted] is given (a function returning a
+## bool), it's asked when the line's turn comes and the line is dropped
+## unsaid if it answers false: for words that go out of date while they wait.
+func say(words: String, style: SpeechBubble.Style = SpeechBubble.Style.SPEECH,
+		still_wanted: Callable = Callable()) -> void:
 	if words.is_empty():
 		return
-	_queue.append(Queued.new(words, style))
+	_queue.append(Queued.new(words, style, still_wanted))
 	if _saying.is_empty():
 		_next()
 
@@ -123,6 +129,11 @@ func hush() -> void:
 	_bubble.hush()
 	if was_saying:
 		hushed.emit()
+
+
+## Forgets everything waiting its turn, but lets the line showing now finish.
+func clear_waiting() -> void:
+	_queue.clear()
 
 
 ## Whether they're saying something, or have something waiting to be said.
@@ -183,10 +194,17 @@ static func style_for(tag: StringName) -> SpeechBubble.Style:
 
 # Shows the next line waiting, or goes quiet.
 func _next() -> void:
-	if _queue.is_empty():
+	var line: Queued = null
+	while not _queue.is_empty() and line == null:
+		var next: Queued = _queue.pop_front()
+		if next.still_wanted.is_valid():
+			var wanted: bool = next.still_wanted.call()
+			if not wanted:
+				continue
+		line = next
+	if line == null:
 		_saying = ""
 		return
-	var line: Queued = _queue.pop_front()
 	_saying = line.words
 	# Look now, so a bubble behind a wall never flashes up before the first check.
 	_seen = is_seen()
