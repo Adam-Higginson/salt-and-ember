@@ -17,38 +17,9 @@
 [ext_resource type="PackedScene" path="res://scenes/props/home/buoy.tscn" id="23_buoy"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/cottage.tscn" id="24_cottage"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/lamp_post.tscn" id="25_lamp_post"]
-
-[sub_resource type="ProceduralSkyMaterial" id="DuskSky"]
-sky_top_color = Color(0.24, 0.16, 0.44, 1)
-sky_horizon_color = Color(0.78, 0.42, 0.5, 1)
-sky_curve = 0.08
-ground_bottom_color = Color(0.1, 0.08, 0.18, 1)
-ground_horizon_color = Color(0.6, 0.36, 0.46, 1)
-ground_curve = 0.05
-sun_angle_max = 38.0
-sun_curve = 0.06
-
-[sub_resource type="Sky" id="Sky"]
-sky_material = SubResource("DuskSky")
-
-[sub_resource type="Environment" id="Environment_dusk"]
-resource_local_to_scene = true
-background_mode = 2
-sky = SubResource("Sky")
-ambient_light_source = 3
-ambient_light_color = Color(0.46, 0.4, 0.66, 1)
-ambient_light_sky_contribution = 0.6
-ambient_light_energy = 0.8
-tonemap_mode = 2
-glow_enabled = true
-glow_intensity = 0.6
-glow_bloom = 0.05
-fog_enabled = true
-fog_light_color = Color(0.44, 0.37, 0.62, 1)
-fog_density = 0.0045
-fog_sky_affect = 0.2
-fog_height = 1.5
-fog_height_density = 0.12
+[ext_resource type="Environment" path="res://data/art/environments/home_dusk.tres" id="26_env"]
+[ext_resource type="Script" path="res://scripts/art/painted_look.gd" id="27_painted"]
+[ext_resource type="Material" path="res://assets/placeholder/materials/water_dusk.tres" id="28_water"]
 
 [sub_resource type="StandardMaterial3D" id="Rock"]
 albedo_color = Color(0.4, 0.34, 0.4, 1)
@@ -104,16 +75,17 @@ world = NodePath("WorldEnvironment")
 ending = NodePath("Screen/Ending")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_dusk")
+environment = ExtResource("26_env")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 rotation = Vector3(-0.055, -2.763, 0)
-light_color = Color(1, 0.56, 0.32, 1)
-light_energy = 0.9
+light_color = Color(1, 0.78, 0.52, 1)
+light_energy = 1.1
 shadow_enabled = true
 directional_shadow_max_distance = 250.0
 
 [node name="SeaSurface" parent="." instance=ExtResource("2_sea")]
+material_override = ExtResource("28_water")
 settings = ExtResource("3_swell")
 hull_half = Vector2(0, 0)
 bow_reach = 0.0
@@ -279,3 +251,9 @@ theme_override_font_sizes/font_size = 40
 text = "To be continued..."
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="PaintedLook" type="Node" parent="."]
+script = ExtResource("27_painted")
+keep_scene_grade = true
+haze_color = Color(0.45, 0.33, 0.55, 1)
+haze_strength = 0.1

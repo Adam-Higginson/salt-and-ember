@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/art/third_party_model.gd" id="1_meshy"]
+
+[sub_resource type="StandardMaterial3D" id="Tin"]
+albedo_color = Color(0.5, 0.2, 0.14, 1)
+metallic = 0
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="Can"]
+size = Vector3(0.2, 0.3, 0.12)
+
+[node name="OilCan" type="Node3D"]
+editor_description = "Meshy model (docs/meshy.md, Model library): assets/third_party/meshy/oil_can, drawn by the Model node: a small tin oil can with a spout, a cap on a little chain and a handle (fitted to 0.35 x 0.3 x 0.13 m, spout toward +X, origin at the bottom). A dressing prop for the boat, jetty and deck. No attach points. The greybox box shows when the art is missing."
+
+[node name="Can" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.15, 0)
+material_override = SubResource("Tin")
+mesh = SubResource("Can")
+
+[node name="Model" type="Node3D" parent="." node_paths=PackedStringArray("stand_ins")]
+script = ExtResource("1_meshy")
+path = "res://assets/third_party/meshy/oil_can/model/model.glb"
+fit_size = Vector3(0.345, 0.3, 0.126)
+stand_ins = [NodePath("../Can")]
