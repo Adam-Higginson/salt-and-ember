@@ -5,8 +5,9 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fish"]
 shader = ExtResource("2_fish")
-shader_parameter/back_color = Color(0.1, 0.12, 0.2, 1)
-shader_parameter/belly_color = Color(0.7, 0.72, 0.82, 1)
+shader_parameter/back_color = Color(0.38, 0.45, 0.62, 1)
+shader_parameter/belly_color = Color(0.88, 0.86, 0.94, 1)
+shader_parameter/glow = 0.35
 shader_parameter/wag = 0.12
 shader_parameter/wag_speed = 9.0
 

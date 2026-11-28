@@ -17,7 +17,7 @@ const MAX_POSTS: int = 8
 ## What the spray gathers round (the rowboat). Empty: round this node.
 @export var follow: Node3D
 ## How far from [member follow] spray comes off the crests, in metres.
-@export var radius: float = 14.0
+@export var radius: float = 10.0
 ## Posts standing in the water, as world x and z, and how thick they are
 ## (their radius, in metres). Up to eight.
 @export var posts: PackedVector2Array = PackedVector2Array()

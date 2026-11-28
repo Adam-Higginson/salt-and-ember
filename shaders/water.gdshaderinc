@@ -130,6 +130,10 @@ uniform float crest_paint : hint_range(0.0, 1.0) = 0.0;
 uniform float crest_softness : hint_range(0.01, 0.5) = 0.12;
 // How much of the sun's colour the foam caps catch on the side facing it.
 uniform float crest_sun : hint_range(0.0, 4.0) = 0.0;
+// With the dusk sky mirrored (reflect_sky), how much a wave face that bounces
+// the view down into the sea mirrors dark water instead of the sky: 0 mirrors
+// the sky as before; towards 1, steep waves' backs stop glaring pale.
+uniform float self_shade : hint_range(0.0, 1.0) = 0.0;
 
 #ifdef CLEAR_WATER
 // --- See-through (water_clear.gdshader only) -------------------------------
@@ -366,13 +370,13 @@ void fragment() {
 		// a few brush strokes, not a ruled line, with a fainter second tone
 		// just below it for a painted edge.
 		vec2 along = vec2(v_wave_dir.y, -v_wave_dir.x);
-		vec2 brush_uv = vec2(dot(v_world.xz, along) * 0.16, dot(v_world.xz, v_wave_dir) * 0.55);
+		vec2 brush_uv = vec2(dot(v_world.xz, along) * 0.3, dot(v_world.xz, v_wave_dir) * 0.8);
 		float brush = texture(foam_noise, brush_uv + vec2(TIME * 0.01, 0.0)).r * 0.65
 				+ texture(foam_noise, brush_uv * 3.1 + 0.37).r * 0.35;
-		float cap = v_crest + (brush - 0.5) * 0.45;
+		float cap = v_crest + (brush - 0.5) * 0.7;
 		foam = smoothstep(crest_foam_from, crest_foam_from + crest_softness, cap);
-		foam = max(foam, smoothstep(crest_foam_from - 0.12,
-				crest_foam_from - 0.12 + crest_softness, cap) * 0.35);
+		foam = max(foam, smoothstep(crest_foam_from - 0.07,
+				crest_foam_from - 0.07 + crest_softness, cap) * 0.3);
 		foam *= crest_paint;
 	}
 	vec2 local = (hull_inverse * vec4(v_world, 1.0)).xz;
@@ -431,8 +435,12 @@ void fragment() {
 	}
 	vec3 to_surface = normalize(v_world - CAMERA_POSITION_WORLD);
 	vec3 mirrored = reflect(to_surface, n);
+	// On the back of a steep wave the view bounces down, into the next wave,
+	// not up to the sky: that face mirrors dark water ([self_shade] of it).
+	float into_sea = smoothstep(0.0, -0.12, mirrored.y) * self_shade;
 	mirrored.y = abs(mirrored.y);
-	vec3 sky_colour = mix(sky_reflection.rgb, dusk_sky(mirrored), reflect_sky);
+	vec3 dusk_mirror = mix(dusk_sky(mirrored), deep_color.rgb, into_sea);
+	vec3 sky_colour = mix(sky_reflection.rgb, dusk_mirror, reflect_sky);
 	vec3 sky = sky_colour * fresnel * (1.0 - foam);
 	EMISSION = sky + crest_color.rgb * glow * night_glow
 			+ foam_color.rgb * foam * night_glow * 0.35

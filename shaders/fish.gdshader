@@ -8,6 +8,9 @@ uniform vec4 belly_color : source_color = vec4(0.62, 0.72, 0.74, 1.0);
 // How far the tail swings, as a part of the fish's length, and how fast.
 uniform float wag = 0.12;
 uniform float wag_speed = 11.0;
+// A little light of their own, so fish seen through dark water still read
+// (the sea's shoals, SeaShoal). 0 is none (the cove's).
+uniform float glow : hint_range(0.0, 1.0) = 0.0;
 
 varying float v_up;
 
@@ -20,6 +23,7 @@ void vertex() {
 
 void fragment() {
 	ALBEDO = mix(belly_color.rgb, back_color.rgb, smoothstep(-0.3, 0.4, v_up));
+	EMISSION = ALBEDO * glow;
 	ROUGHNESS = 0.35;
 	SPECULAR = 0.6;
 }

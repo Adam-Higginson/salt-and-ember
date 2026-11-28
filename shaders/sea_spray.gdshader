@@ -10,6 +10,8 @@
 // that fly start on the surface, lift and are blown along the wave, then
 // fall back and fade.
 shader_type particles;
+// The droplets are moved here, in process(), not by Godot.
+render_mode disable_velocity;
 
 // The waves, as the Sea hands them to the water (Sea.apply_waves_to).
 uniform int wave_count = 0;
@@ -19,10 +21,10 @@ uniform float wave_time = 0.0;
 // The sea's still level (its node's height) and where the spray gathers.
 uniform float sea_level = 0.0;
 uniform vec2 centre = vec2(0.0);
-uniform float radius = 14.0;
+uniform float radius = 10.0;
 // How pointed a crest must be before spray comes off it (0 to 1, the same
 // scale as the water's crest foam).
-uniform float crest_from = 0.55;
+uniform float crest_from = 0.42;
 // Up to eight posts standing in the water (the jetty's piles): x, z, radius.
 uniform int post_count = 0;
 uniform vec3 posts[8];
@@ -35,11 +37,11 @@ uniform float burst_seconds = 0.35;
 uniform int bursts = 6;
 // How fast droplets lift and are blown along, in metres a second, and how
 // hard they fall.
-uniform float lift = 1.7;
-uniform float blow = 1.4;
-uniform float gravity = 5.5;
+uniform float lift = 3.2;
+uniform float blow = 2.0;
+uniform float gravity = 6.0;
 // How big a droplet is, smallest to biggest, in metres.
-uniform vec2 sizes = vec2(0.08, 0.22);
+uniform vec2 sizes = vec2(0.18, 0.45);
 
 float hash(uint n) {
 	n = (n << 13u) ^ n;
@@ -98,7 +100,7 @@ void start() {
 			float angle = hash(burst_seed + 1u) * 6.2832;
 			float out_by = sqrt(hash(burst_seed + 2u)) * radius;
 			spot = centre + vec2(cos(angle), sin(angle)) * out_by
-					+ (vec2(hash(own_seed + 5u), hash(own_seed + 9u)) - 0.5) * 0.9;
+					+ (vec2(hash(own_seed + 5u), hash(own_seed + 9u)) - 0.5) * 1.4;
 			wanted = crest_from;
 		}
 		vec4 here = surface(spot);
@@ -108,7 +110,7 @@ void start() {
 		} else {
 			float size = mix(sizes.x, sizes.y, hash(own_seed + 13u));
 			TRANSFORM = mat4(1.0);
-			TRANSFORM[3].xyz = here.xyz;
+			TRANSFORM[3].xyz = here.xyz + vec3(0.0, 0.08, 0.0);
 			vec2 along = blown();
 			float strength = 0.5 + hash(own_seed + 17u);
 			vec2 scatter = (vec2(hash(own_seed + 19u), hash(own_seed + 23u)) - 0.5) * 0.8;
@@ -127,6 +129,7 @@ void start() {
 void process() {
 	VELOCITY.y -= gravity * DELTA;
 	VELOCITY.xz *= 1.0 - 0.6 * DELTA;
+	TRANSFORM[3].xyz += VELOCITY * DELTA;
 	CUSTOM.y = clamp(CUSTOM.y + DELTA / LIFETIME, 0.0, 1.0);
 	// Fades in quickly, out slowly; gone once it falls back in.
 	COLOR.a = smoothstep(0.0, 0.1, CUSTOM.y) * (1.0 - smoothstep(0.5, 1.0, CUSTOM.y));

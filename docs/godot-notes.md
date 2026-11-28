@@ -814,6 +814,20 @@ A growing glossary of the Godot concepts this project uses: what each one is, in
 
 **Local to scene.** An Environment saved as a `.tres` is shared by everything that loads it. Setting *Local to Scene* gives each scene its own copy, so home waters can change the fog without touching the file. *Ours:* `home_dusk.tres`.
 
+## Waves, see-through water and fish (home waters)
+
+**Gerstner waves, peaked.** A Gerstner wave moves each point of the sea round a circle instead of just up and down, so points bunch together at the crest (sharp) and spread out in the trough (wide). How far a point moves sideways, times the wave's slope, is its *steepness*: 0 is a plain sine, 1 is a cusp, and above 1 the surface folds through itself. *Ours:* `WaveLayer.peak` sets it directly for home waters' dusk swell (`data/sea/dusk_swell.tres`); the layers' peaks add up to about 0.84, so even where all the crests meet they don't fold.
+
+**Newton's method.** A way to solve "which point lands here?" fast: guess, see how far off you landed, and use how the landing moves when the guess moves (the slope, here a 2x2 matrix) to correct the guess. The simple search (move back by the miss) crawls on peaked waves; Newton's lands in a few steps. *Ours:* `Waves.still_point`, which `Sea.height_at` and so the rowboat use.
+
+**Shader includes (`#include`, `#define`).** A `.gdshaderinc` file holds shader code shared by several shaders; `#ifdef NAME` parts are only compiled into the shaders that `#define NAME` first. *Ours:* `shaders/water.gdshaderinc` is the sea; `water.gdshader` (opaque, the night seas) and `water_clear.gdshader` (`#define CLEAR_WATER`, the dusk sea) include it.
+
+**Depth-based transparency (screen and depth textures).** A material that reads `hint_screen_texture` sees the picture of everything solid drawn so far, and `hint_depth_texture` how far away each pixel of it is. The water works out how much water lies between its surface and what's behind it, and dims and tints that by Beer-Lambert's law (each metre lets through the same share). Reading the screen makes a material see-through, drawn after everything solid: it is sorted with the other see-through things, and it isn't in the depth picture other effects read, so `water_clear` writes its own depth (`depth_draw_always`). *Ours:* `clarity`, `clear_depth` and `clear_tint` in `water_dusk.tres`.
+
+**Particle process shaders.** A `GPUParticles3D` can run a `shader_type particles` shader on the graphics card for each particle: `start()` when it's born (set `TRANSFORM`, `VELOCITY`, or `ACTIVE = false` to switch it off) and `process()` every frame. *Ours:* `shaders/sea_spray.gdshader` works out the waves where each burst would start and only lets the ones on a sharp crest (or beside a jetty pile as the water rises) fly. `SeaSpray` hands it the waves.
+
+**MultiMesh shoals.** A `MultiMeshInstance3D` draws one mesh many times in a single draw call, each copy with its own transform. Moving a fish is setting its transform. *Ours:* `SeaShoal` (`scripts/sea/sea_shoal.gd`): a few shoals of eight, each a point steering to wander targets near the rowboat or the jetty, its fish keeping their places round it; the boat's `stroked` signal scatters any near the oars.
+
 ## Testing
 
 **gdUnit4.** The test framework (`addons/gdUnit4`). Suites extend our `GameTestSuite` and have `test_...` functions. `scene_runner` loads a scene and lets a test press inputs and wait physics ticks. *Ours:* `tests/`.

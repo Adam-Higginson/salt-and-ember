@@ -32,10 +32,10 @@ const DART_SPEED: float = 3.2
 @export var speed: float = 0.8
 ## How far below the still sea they swim, in metres: the middle of each
 ## shoal, and how far a fish strays up or down from it.
-@export var depth: float = 1.2
-@export var depth_spread: float = 0.25
+@export var depth: float = 1.0
+@export var depth_spread: float = 0.15
 ## How long a fish is, in metres.
-@export var fish_length: float = 0.32
+@export var fish_length: float = 0.42
 ## How close the oars must dip to a shoal to scatter it, in metres.
 @export var scatter_within: float = 5.0
 ## A shoal further than this from its anchor slips back in, [member regroup_at]

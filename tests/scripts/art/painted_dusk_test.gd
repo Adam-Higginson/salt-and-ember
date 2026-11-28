@@ -15,7 +15,7 @@ const HOME_SCENE: String = "res://scenes/prototype/intro/home_waters.tscn"
 const DUSK_DIALS: Array[StringName] = [
 	&"reflect_sky", &"glitter", &"far_blend", &"foam_crisp", &"paint_waves",
 	&"reflection_bands", &"reflection_floor", &"sun_path", &"sky_clouds",
-	&"crest_paint", &"crest_sun",
+	&"crest_paint", &"crest_sun", &"self_shade",
 ]
 
 

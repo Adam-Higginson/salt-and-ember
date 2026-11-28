@@ -40,7 +40,7 @@ void fragment() {
 	p = vec2(c * p.x - s * p.y, s * p.x + c * p.y);
 	// A dab: a soft disc with a ragged, brushed edge.
 	float ragged = texture(dab_noise, p * 0.6 + v_spin).r;
-	float dab = 1.0 - smoothstep(0.22, 0.42, length(p * vec2(1.0, 1.4)) + (ragged - 0.5) * 0.25);
+	float dab = 1.0 - smoothstep(0.26, 0.48, length(p * vec2(1.0, 1.4)) + (ragged - 0.5) * 0.25);
 	vec3 colour = mix(cool_color.rgb, warm_color.rgb, v_sunward * v_sunward);
 	ALBEDO = colour * (0.8 + 0.6 * v_sunward * v_sunward);
 	ALPHA = dab * COLOR.a * strength;
