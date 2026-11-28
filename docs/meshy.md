@@ -121,11 +121,11 @@ Meshy always hands back a one-metre model, so each is scaled by `fit_size` (thes
 | Chain link | `chain_link/model/model.glb` | `HangingChain.link_model` (home waters' chain, the Grave's three) | scaled by `link_length` | none (the chain starts at the mooring's `ChainEye`) | mooring | 15 |
 | Cliff piece | `cliff_a/model/model.glb` | `scenes/props/home/island/cliff_a.tscn` | 8 x 6 x 4 | none | cliff corner, boulders | 15 |
 | Cliff corner | `cliff_corner/model/model.glb` | `scenes/props/home/island/cliff_corner.tscn` | 6 x 9 x 6 | none | cliff piece | 15 |
-| Boulders | `boulders/model/model.glb` | `scenes/props/home/island/boulders.tscn` | 4.5 x 2.25 x 5 (a pair) | none | cliffs, heather | 15 |
-| Wind-bent tree | `tree_windbent/model/model.glb` | `scenes/props/home/island/tree_windbent.tscn` | 8.8 x 6 x 6.3 (its crown leans towards -X) | none | heather | 15 |
-| Heather | `heather/model/model.glb` | `scenes/props/home/island/heather.tscn` | 1.2 x 0.45 x 1.1 | none | boulders, tree | 15 |
+| Boulders | `boulders/model/model.glb` | `scenes/props/home/island/boulders.tscn` | 4.5 x 2.25 x 5 (a pair) | none | cliffs | 15 |
+| Wind-bent tree | `tree_windbent/model/model.glb` | `scenes/props/home/island/tree_windbent.tscn` | 8.8 x 6 x 6.3 (its crown leans towards -X) | none | | 15 |
+| ~~Heather~~ (dropped) | `heather/model/model.glb` (kept in the art repo, unused) | none | 1.2 x 0.45 x 1.1 | none | | 15 |
 
-The last five are the home island's landscape kit, made for the terrain work to place (the scenes aren't in the game yet; `scenes/props/home/island/kit_gallery.tscn` lays them out in a row to check scale). Same recipe, 75 credits. Cliffs 8,000 triangles targeted (6,721 and 7,489 came back), boulders 4,000 (3,757), tree 6,000 (5,732), heather 2,000 (1,599). The face of each looks along +Z, with no rotation. The corner is stretched about 1.5 times taller than it was made, to the 9 m asked for. The tree comes with its grass mound and rock. The heather came out dark and spiky; check it at game distance before scattering it widely.
+The last five are the home island's landscape kit, made for the terrain work to place (the scenes aren't in the game yet; `scenes/props/home/island/kit_gallery.tscn` lays them out in a row to check scale). Same recipe, 75 credits. Cliffs 8,000 triangles targeted (6,721 and 7,489 came back), boulders 4,000 (3,757), tree 6,000 (5,732), heather 2,000 (1,599). The face of each looks along +Z, with no rotation. The corner is stretched about 1.5 times taller than it was made, to the 9 m asked for. The tree comes with its grass mound and rock. The heather came out small, dark and spiky, so it was dropped from the kit: the island's heather will be a painted terrain texture or particles instead.
 
 Notes:
 

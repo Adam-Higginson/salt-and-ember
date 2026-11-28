@@ -4,7 +4,6 @@
 [ext_resource type="PackedScene" path="res://scenes/props/home/island/cliff_corner.tscn" id="2_corner"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/island/boulders.tscn" id="3_boulders"]
 [ext_resource type="PackedScene" path="res://scenes/props/home/island/tree_windbent.tscn" id="4_tree"]
-[ext_resource type="PackedScene" path="res://scenes/props/home/island/heather.tscn" id="5_heather"]
 
 [sub_resource type="StandardMaterial3D" id="Ground"]
 albedo_color = Color(0.35, 0.45, 0.3, 1)
@@ -32,8 +31,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
 [node name="TreeWindbent" parent="." instance=ExtResource("4_tree")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 0)
 
-[node name="Heather" parent="." instance=ExtResource("5_heather")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.9396926, 0.3420201, 0, -0.3420201, 0.9396926, 0, 9, 24)

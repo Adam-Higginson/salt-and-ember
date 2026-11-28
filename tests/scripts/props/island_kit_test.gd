@@ -1,12 +1,12 @@
 extends GameTestSuite
 ## Tests for the home island's landscape kit (Meshy models: cliffs, boulders,
-## a wind-bent tree, heather). Each prop keeps a greybox stand-in so the scene
+## a wind-bent tree). Each prop keeps a greybox stand-in so the scene
 ## works with no art (a fresh clone, CI). These test the stand-in wiring, never
 ## the models.
 
 const ISLAND: String = "res://scenes/props/home/island/"
 const PROPS: Array[String] = [
-	"cliff_a.tscn", "cliff_corner.tscn", "boulders.tscn", "tree_windbent.tscn", "heather.tscn",
+	"cliff_a.tscn", "cliff_corner.tscn", "boulders.tscn", "tree_windbent.tscn",
 ]
 
 
@@ -30,7 +30,7 @@ func test_without_the_art_the_stand_ins_show() -> void:
 
 func test_the_gallery_lays_out_all_five_props() -> void:
 	var gallery: Node3D = _new_scene(ISLAND + "kit_gallery.tscn")
-	for prop_name: String in ["CliffA", "CliffCorner", "Boulders", "TreeWindbent", "Heather"]:
+	for prop_name: String in ["CliffA", "CliffCorner", "Boulders", "TreeWindbent"]:
 		assert_bool(gallery.has_node(prop_name)).override_failure_message(
 				"gallery has no %s" % prop_name).is_true()
 
