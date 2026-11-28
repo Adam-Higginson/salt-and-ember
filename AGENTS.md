@@ -1,4 +1,4 @@
-# Ship adventure game (repo name: restaurant)
+# Salt and Ember
 
 ## Stack
 - Godot 4.7, GDScript only (no C#).
@@ -22,7 +22,7 @@ The full design lives in `docs/GDD.md`. Read it before starting a gameplay task,
 ## Public repo
 - This repo is public. Third-party art and audio go in `assets/third_party/`, which is gitignored: never commit anything from it, and never commit keys or tokens.
 - **The art is backed up in a private repo (#142).** `assets/third_party/` is its own git repo, a clone of the private `Adam-Higginson/restaurant-assets` (the packs, Meshy models and ambient sounds, `.import` files included). Its `.gitattributes` turns off line-ending conversion so it's a byte-for-byte copy.
-  - **Back up** after adding a pack or making a Meshy model: in `assets/third_party/`, `git add -A`, commit with the issue in the message (`Adam-Higginson/restaurant#<n>`), and push. Say when a task changed the art, so the user knows to back it up.
+  - **Back up** after adding a pack or making a Meshy model: in `assets/third_party/`, `git add -A`, commit with the issue in the message (`Adam-Higginson/salt-and-ember#<n>`), and push. Say when a task changed the art, so the user knows to back it up.
   - **New PC or worktree, if the task needs the real art:** `git clone https://github.com/Adam-Higginson/restaurant-assets.git assets/third_party`, then import (`godot_console.exe --headless --path . --import`). Clone, don't copy, so the copy is a working backup too.
   - It stays private: it holds the raw packs, which we ship inside builds but don't re-host.
 - Our own placeholder art (generated, not third-party) lives in `assets/placeholder/` and is committed. Its cloth, paper and painted textures are painted soft by `tools/textures/paint_placeholders.sh` from the pixel-art originals in `tools/textures/originals/` (#135): change an original or a recipe and run it again; don't hand-edit the painted PNGs.
@@ -36,7 +36,7 @@ The full design lives in `docs/GDD.md`. Read it before starting a gameplay task,
 - The recipe, the prompts that worked and the gotchas (scale the node, never `fit_size`; turn it 180 degrees) are in `docs/meshy.md`.
 
 ## Task tracking
-- The backlog is GitHub Project #1 owned by `Adam-Higginson` (kanban columns: Todo, In Progress, In Review, Done). Each task is an issue in `Adam-Higginson/restaurant` added to the board.
+- The backlog is GitHub Project #1 owned by `Adam-Higginson` (kanban columns: Todo, In Progress, In Review, Done). Each task is an issue in `Adam-Higginson/salt-and-ember` added to the board.
 - Claude works on GitHub as `adam-higginson-claude`, a machine account with Write on this repo, `restaurant-assets` and the board. Its login and commit name come from the gitignored `.claude/settings.local.json` (an `env` block: `GH_CONFIG_DIR` for `gh`, `GIT_CONFIG_*` so git pushes use `gh auth git-credential`, and `GIT_AUTHOR_*`/`GIT_COMMITTER_*`), which `.worktreeinclude` copies into new worktrees. Before the first push in a session, check `gh api user --jq .login` says `adam-higginson-claude`; if not, stop and say so. Never print or handle its token.
 - Each task runs in its own git worktree on its own branch, usually as a separate Claude session the user can open and steer. The main chat coordinates from a clean `main` and doesn't do task coding in its own folder.
 - The user chooses which task to work on. If none was given, list the Todo items and ask.
