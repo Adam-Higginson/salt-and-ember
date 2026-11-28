@@ -85,7 +85,7 @@ The hero's own (`meshy/boy_stern/layers/`) were tucked this way: shirt into trou
 
 ## Models wanted (home waters, #227)
 
-**Done in #234:** the cottage, the home cottage, the jetty, the lamp post, the mooring and the chain link, plus the rowboat's hull and oars and the hydrangea pots (see the Model library below). Only the buoy is still greybox. The table is what each prop was asked to be.
+**Done in #234:** the cottage, the home cottage, the jetty, the lamp post, the mooring and the chain link, plus the rowboat's hull and oars and the hydrangea pots (see the Model library below). The loose gear (rope coil, oil can, boathook) and the buoy's model came after, in the batch below; the buoy scene is still greybox until #246 merges. The table is what each prop was asked to be.
 
 The opening's first beat (`scenes/prototype/intro/home_waters.tscn`) was greybox. Every prop is its own scene under `scenes/props/home/`, so a Meshy model replaces a prop in one place and every instance picks it up. Sizes are rough, in metres. Concept images are in `docs/concept/opening/`.
 
@@ -104,7 +104,7 @@ Not wanted as models: the island's land (hill, shelf, knoll and rocks) is terrai
 
 ## Model library (#234)
 
-Every model is one reusable part. Where another part attaches or moves, the prop scene has a named `Marker3D`, so a part can be swapped or combined without touching the others. Each model's folder, `assets/third_party/meshy/<name>/`, has a `meta.json` (the picture, the prompt, Meshy's task, settings, size, scale and rotation used in Godot, attach points, and which scenes use it) and `concept.png` (the picture it was made from). The pictures were drawn in ChatGPT, then each went into one image-to-3D task (smart topology, `meshy-t2.5`, `meshy-n1` texture at 2K), 15 credits each: 135 for the nine.
+Every model is one reusable part. Where another part attaches or moves, the prop scene has a named `Marker3D`, so a part can be swapped or combined without touching the others. Each model's folder, `assets/third_party/meshy/<name>/`, has a `meta.json` (the picture, the prompt, Meshy's task, settings, size, scale and rotation used in Godot, attach points, and which scenes use it) and `concept.png` (the picture it was made from). The pictures were drawn in ChatGPT, then each went into one image-to-3D task (smart topology, `meshy-t2.5`, `meshy-n1` texture at 2K), 15 credits each: 135 for the nine, then 60 for the second batch of four.
 
 Meshy always hands back a one-metre model, so each is scaled by `fit_size` (these aren't rigged, so that's safe) or by the node's scale, and turned to face our way.
 
@@ -119,6 +119,10 @@ Meshy always hands back a one-metre model, so each is scaled by `fit_size` (thes
 | Lamp post | `lamp_post/model/model.glb` | `scenes/props/home/lamp_post.tscn` (x6) | 0.52 x 3.1 x 1.2 | `LanternHook` (the hook; `lantern.tscn` hangs from it) | `lantern.tscn` | 15 |
 | Mooring | `mooring/model/model.glb` | `scenes/props/home/mooring.tscn` | 12 x 8.6 x 12 | `ChainEye` (the eye on the post) | chain link | 15 |
 | Chain link | `chain_link/model/model.glb` | `HangingChain.link_model` (home waters' chain, the Grave's three) | scaled by `link_length` | none (the chain starts at the mooring's `ChainEye`) | mooring | 15 |
+| Rope coil | `rope_coil/model/model.glb` | `scenes/props/home/rope_coil.tscn` (also in the rowboat's `Gear`) | 0.76 x 0.2 x 0.89 | none | rowboat, jetty, deck, buoy | 15 |
+| Oil can | `oil_can/model/model.glb` | `scenes/props/home/oil_can.tscn` (also in the rowboat's `Gear`) | 0.35 x 0.3 x 0.13 | none | rowboat, jetty, deck | 15 |
+| Boathook | `boathook/model/model.glb` | `scenes/props/home/boathook.tscn` (also in the rowboat's `Gear`) | 2.0 long | none | rowboat, jetty | 15 |
+| Buoy | `buoy/model/model.glb` | not placed yet: it goes in `scenes/props/home/buoy.tscn` after #246 merges | 0.53 x 0.95 x 0.54 at one metre (fit by height, about 3.9 x 7 x 4) | the mounting plate for `Lamp`, the ladder up one leg (`LadderSpot`/`ClimbTop`), two lifting eyes for the chain | buoy lamp (not made), chain link | 15 |
 
 Notes:
 
@@ -129,4 +133,6 @@ Notes:
 - **The windows** have dark glass in every model; the glow is a see-through quad in the scene (`WindowUpper`, `WindowLower`, `BigWindow`) plus `WindowLight`.
 - **Footings:** the cottages stand on a hillside, so each keeps a dark stone `Foundation` box under the model, down into the hill, as the old greybox body did.
 - **Rowboat:** the greybox rower sits on the model's rowing thwart; the lantern hangs at the bow pole's ring, lower than the old greybox pole held it (the model's pole is shorter), and its `Voice` is 0.35 m above it.
-- **Still to make:** rope coil, boathook and oil can (loose gear), the buoy (float, lattice tower, railed platform) and its caged lamp.
+- **Loose gear (second batch, 60 credits for the four):** the rope coil and oil can lie on the rowboat's floor in the bow and the boathook rests on the thwarts along the starboard side, all under the rowboat's `Gear` node (a test checks none overlaps the rower or another). Each is its own prop scene with a greybox stand-in, so they can go on the jetty or the deck too (not placed there yet).
+- **The buoy** model is made and saved (`buoy/model/model.glb`, 9,679 triangles) but **not swapped into `buoy.tscn`**: PR #246 is reworking that scene (lamp node, interaction markers, ladder), so the swap waits for it. Its proportions are taller and narrower than the 5 x 7 x 5 brief (0.53 : 0.95 : 0.54), so fit it by height and check the legs against #246's markers.
+- **Still to make:** the buoy's caged lamp.
