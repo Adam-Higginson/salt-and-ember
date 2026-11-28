@@ -69,6 +69,28 @@ func height_at(spot: Vector2) -> float:
 	return Waves.height_at(settings, spot, _time)
 
 
+## Hands [param material] the waves as they are now: the uniforms
+## [code]wave_count[/code], [code]wave_a[/code], [code]wave_b[/code] and
+## [code]wave_time[/code], as the water shader has them. Anything else drawn
+## from the same waves (the spray, [SeaSpray]) is given them this way.
+func apply_waves_to(material: ShaderMaterial) -> void:
+	if settings == null:
+		return
+	var a: PackedVector4Array = PackedVector4Array()
+	var b: PackedVector4Array = PackedVector4Array()
+	for layer: WaveLayer in settings.used_layers():
+		var dir: Vector2 = layer.direction()
+		a.append(Vector4(dir.x, dir.y, layer.wave_number(), layer.speed()))
+		b.append(Vector4(layer.amplitude, layer.sideways(), 0.0, 0.0))
+	while a.size() < WaveSettings.MAX_LAYERS:
+		a.append(Vector4.ZERO)
+		b.append(Vector4.ZERO)
+	material.set_shader_parameter("wave_count", settings.used_layers().size())
+	material.set_shader_parameter("wave_a", a)
+	material.set_shader_parameter("wave_b", b)
+	material.set_shader_parameter("wave_time", _time * settings.time_scale)
+
+
 # Centres the plane under the ship (in grid steps) and lowers it by the wave
 # height there, so the waterline stays put on the hull while the sea moves.
 func _follow_ship() -> void:
@@ -87,19 +109,7 @@ func _follow_ship() -> void:
 func _apply() -> void:
 	if _material == null or settings == null:
 		return
-	var a: PackedVector4Array = PackedVector4Array()
-	var b: PackedVector4Array = PackedVector4Array()
-	for layer: WaveLayer in settings.used_layers():
-		var dir: Vector2 = layer.direction()
-		a.append(Vector4(dir.x, dir.y, layer.wave_number(), layer.speed()))
-		b.append(Vector4(layer.amplitude, layer.sideways(), 0.0, 0.0))
-	while a.size() < WaveSettings.MAX_LAYERS:
-		a.append(Vector4.ZERO)
-		b.append(Vector4.ZERO)
-	_material.set_shader_parameter("wave_count", settings.used_layers().size())
-	_material.set_shader_parameter("wave_a", a)
-	_material.set_shader_parameter("wave_b", b)
-	_material.set_shader_parameter("wave_time", _time * settings.time_scale)
+	apply_waves_to(_material)
 	_material.set_shader_parameter("rain", rain)
 	_material.set_shader_parameter("grave", grave)
 	_material.set_shader_parameter("hull_half", hull_half)

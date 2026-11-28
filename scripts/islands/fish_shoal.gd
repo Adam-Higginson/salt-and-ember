@@ -66,7 +66,7 @@ func _ready() -> void:
 		)
 	var many: MultiMesh = MultiMesh.new()
 	many.transform_format = MultiMesh.TRANSFORM_3D
-	many.mesh = _fish_mesh()
+	many.mesh = fish_mesh()
 	many.instance_count = count
 	multimesh = many
 	# The fish wander well away from this node's own spot.
@@ -115,6 +115,49 @@ func fish_position(index: int) -> Vector3:
 	return _fish_transform(index).origin
 
 
+## One fish, one unit long, its nose towards -Z (the way looking_at faces):
+## a body of eight triangles and a tail of one. UV.x runs from nose (0) to
+## tail (1); the shader (shaders/fish.gdshader) wags it more the further
+## back. Shared with [SeaShoal].
+static func fish_mesh() -> ArrayMesh:
+	var nose: Vector3 = Vector3(0.0, 0.0, -0.5)
+	var top: Vector3 = Vector3(0.0, 0.15, -0.12)
+	var bottom: Vector3 = Vector3(0.0, -0.13, -0.12)
+	var left: Vector3 = Vector3(-0.07, 0.0, -0.12)
+	var right: Vector3 = Vector3(0.07, 0.0, -0.12)
+	var waist: Vector3 = Vector3(0.0, 0.0, 0.3)
+	var fin_top: Vector3 = Vector3(0.0, 0.15, 0.5)
+	var fin_bottom: Vector3 = Vector3(0.0, -0.15, 0.5)
+	var faces: Array[Vector3] = [
+		nose, top, right, nose, right, bottom, nose, bottom, left, nose, left, top,
+		waist, right, top, waist, bottom, right, waist, left, bottom, waist, top, left,
+		waist, fin_top, fin_bottom,
+	]
+	var points: PackedVector3Array = PackedVector3Array()
+	var normals: PackedVector3Array = PackedVector3Array()
+	var uvs: PackedVector2Array = PackedVector2Array()
+	for corner: int in range(0, faces.size(), 3):
+		var a: Vector3 = faces[corner]
+		var b: Vector3 = faces[corner + 1]
+		var c: Vector3 = faces[corner + 2]
+		var facing: Vector3 = (c - a).cross(b - a).normalized()
+		# Whichever way round the corners were listed, face outwards.
+		if facing.dot((a + b + c) / 3.0 - Vector3(0.0, 0.0, -0.1)) < 0.0:
+			facing = -facing
+		for point: Vector3 in [a, b, c]:
+			points.append(point)
+			normals.append(facing)
+			uvs.append(Vector2(point.z + 0.5, 0.5))
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = points
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	var mesh: ArrayMesh = ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
+
 func _place_fish() -> void:
 	if shape == null or multimesh == null:
 		return
@@ -154,45 +197,3 @@ func _too_close() -> bool:
 	var away: Vector3 = wary_of.global_position - centre()
 	away.y = 0.0
 	return away.length() < startle_within
-
-
-# One fish, one unit long, its nose towards -Z (the way looking_at faces):
-# a body of eight triangles and a tail of one. UV.x runs from nose (0) to
-# tail (1); the shader wags it more the further back.
-func _fish_mesh() -> ArrayMesh:
-	var nose: Vector3 = Vector3(0.0, 0.0, -0.5)
-	var top: Vector3 = Vector3(0.0, 0.15, -0.12)
-	var bottom: Vector3 = Vector3(0.0, -0.13, -0.12)
-	var left: Vector3 = Vector3(-0.07, 0.0, -0.12)
-	var right: Vector3 = Vector3(0.07, 0.0, -0.12)
-	var waist: Vector3 = Vector3(0.0, 0.0, 0.3)
-	var fin_top: Vector3 = Vector3(0.0, 0.15, 0.5)
-	var fin_bottom: Vector3 = Vector3(0.0, -0.15, 0.5)
-	var faces: Array[Vector3] = [
-		nose, top, right, nose, right, bottom, nose, bottom, left, nose, left, top,
-		waist, right, top, waist, bottom, right, waist, left, bottom, waist, top, left,
-		waist, fin_top, fin_bottom,
-	]
-	var points: PackedVector3Array = PackedVector3Array()
-	var normals: PackedVector3Array = PackedVector3Array()
-	var uvs: PackedVector2Array = PackedVector2Array()
-	for corner: int in range(0, faces.size(), 3):
-		var a: Vector3 = faces[corner]
-		var b: Vector3 = faces[corner + 1]
-		var c: Vector3 = faces[corner + 2]
-		var facing: Vector3 = (c - a).cross(b - a).normalized()
-		# Whichever way round the corners were listed, face outwards.
-		if facing.dot((a + b + c) / 3.0 - Vector3(0.0, 0.0, -0.1)) < 0.0:
-			facing = -facing
-		for point: Vector3 in [a, b, c]:
-			points.append(point)
-			normals.append(facing)
-			uvs.append(Vector2(point.z + 0.5, 0.5))
-	var arrays: Array = []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = points
-	arrays[Mesh.ARRAY_NORMAL] = normals
-	arrays[Mesh.ARRAY_TEX_UV] = uvs
-	var mesh: ArrayMesh = ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	return mesh

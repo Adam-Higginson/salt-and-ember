@@ -20,6 +20,13 @@
 [ext_resource type="Environment" path="res://data/art/environments/home_dusk.tres" id="26_env"]
 [ext_resource type="Script" path="res://scripts/art/painted_look.gd" id="27_painted"]
 [ext_resource type="Material" path="res://assets/placeholder/materials/water_dusk.tres" id="28_water"]
+[ext_resource type="PackedScene" path="res://scenes/prototype/weather/sea_spray.tscn" id="29_spray"]
+[ext_resource type="PackedScene" path="res://scenes/prototype/weather/sea_shoal.tscn" id="30_shoal"]
+
+[sub_resource type="PlaneMesh" id="FineSea"]
+size = Vector2(480, 480)
+subdivide_width = 400
+subdivide_depth = 400
 
 [sub_resource type="StandardMaterial3D" id="Rock"]
 albedo_color = Color(0.4, 0.34, 0.4, 1)
@@ -86,12 +93,21 @@ directional_shadow_max_distance = 250.0
 
 [node name="SeaSurface" parent="." instance=ExtResource("2_sea")]
 material_override = ExtResource("28_water")
+mesh = SubResource("FineSea")
 settings = ExtResource("3_swell")
 hull_half = Vector2(0, 0)
 bow_reach = 0.0
 
 [node name="Rowboat" parent="." instance=ExtResource("4_boat")]
 position = Vector3(28, 0, 29)
+
+[node name="SeaSpray" parent="." node_paths=PackedStringArray("follow") instance=ExtResource("29_spray")]
+position = Vector3(28, 0, 29)
+follow = NodePath("../Rowboat")
+posts = PackedVector2Array(22.6, 26.5, 25.4, 26.5, 22.6, 30, 25.4, 30, 22.6, 33.5, 25.4, 33.5, 22.6, 37, 25.4, 37)
+
+[node name="SeaShoal" parent="." node_paths=PackedStringArray("anchors") instance=ExtResource("30_shoal")]
+anchors = [NodePath("../Rowboat"), NodePath("../Rowboat"), NodePath("../Island/Jetty")]
 
 [node name="Voice" type="Marker3D" parent="Rowboat/BowPole"]
 position = Vector3(0, 0.35, 0)

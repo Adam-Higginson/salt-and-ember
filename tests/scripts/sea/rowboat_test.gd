@@ -4,6 +4,7 @@ extends GameTestSuite
 
 const BOAT_SCENE: String = "res://scenes/prototype/intro/rowboat.tscn"
 const SEA_SCENE: String = "res://scenes/prototype/weather/sea_surface.tscn"
+const DUSK_SWELL: WaveSettings = preload("res://data/sea/dusk_swell.tres")
 
 
 func test_rowing_ahead_moves_the_boat_forward() -> void:
@@ -178,6 +179,20 @@ func test_it_rides_on_the_sea() -> void:
 		await physics_ticks(runner, 30)
 		assert_float(boat.global_position.y - boat.float_height).is_equal_approx(
 				FloatOnSea.surface_height(sea, boat.global_position), 0.3)
+
+
+func test_it_rides_the_peaked_dusk_swell() -> void:
+	var boat: Rowboat = _boat_in_world(null, true)
+	var sea: Sea = boat.get_parent().get_node("Sea") as Sea
+	sea.settings = DUSK_SWELL
+	var runner: GdUnitSceneRunner = scene_runner(boat.get_parent())
+	var limit: float = deg_to_rad(boat.max_tilt_degrees) + 0.001
+
+	for check: int in 6:
+		await physics_ticks(runner, 20)
+		assert_float(boat.global_position.y - boat.float_height).is_equal_approx(
+				FloatOnSea.surface_height(sea, boat.global_position), 0.3)
+		assert_float(maxf(absf(boat.rotation.x), absf(boat.rotation.z))).is_less_equal(limit)
 
 
 func test_it_never_tilts_past_its_limit() -> void:

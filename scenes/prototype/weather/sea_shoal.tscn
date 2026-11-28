@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/sea/sea_shoal.gd" id="1_script"]
+[ext_resource type="Shader" path="res://shaders/fish.gdshader" id="2_fish"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fish"]
+shader = ExtResource("2_fish")
+shader_parameter/back_color = Color(0.1, 0.12, 0.2, 1)
+shader_parameter/belly_color = Color(0.7, 0.72, 0.82, 1)
+shader_parameter/wag = 0.12
+shader_parameter/wag_speed = 9.0
+
+[node name="SeaShoal" type="MultiMeshInstance3D"]
+material_override = SubResource("ShaderMaterial_fish")
+cast_shadow = 0
+script = ExtResource("1_script")

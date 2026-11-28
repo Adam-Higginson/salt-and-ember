@@ -19,3 +19,13 @@ const MAX_LAYERS: int = 4
 ## The layers the shader can draw: the first [constant MAX_LAYERS].
 func used_layers() -> Array[WaveLayer]:
 	return layers.slice(0, MAX_LAYERS)
+
+
+## Whether any layer has peaked crests ([member WaveLayer.peak]). Peaked
+## waves push the surface further sideways, so finding heights takes more
+## search steps (see [method Waves.height_at]).
+func is_peaked() -> bool:
+	for layer: WaveLayer in used_layers():
+		if layer.peak > 0.0:
+			return true
+	return false
